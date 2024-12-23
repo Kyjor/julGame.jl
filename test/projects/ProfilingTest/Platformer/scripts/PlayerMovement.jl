@@ -1,5 +1,5 @@
 module PlayerMovementModule
-    using JulGame
+    using ..JulGame
 
     mutable struct PlayerMovement
         animator
