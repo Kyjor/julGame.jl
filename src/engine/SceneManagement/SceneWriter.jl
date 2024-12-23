@@ -232,8 +232,11 @@ module SceneWriterModule
                     continue
                 end
                 val = nothing
-                if isdefined(script, Symbol(field)) 
+                if isdefined(script, Symbol(field))
                     val = getfield(script, field)
+                    if typeof(val) <: AbstractArray
+                        val = nothing
+                    end
                 else 
                     val = set_undefined_field(script, field)
                 end

@@ -228,6 +228,8 @@ module SceneBuilderModule
                                 value = Float64(value)
                             elseif ftype == Int32
                                 value = Int32(value)
+                            elseif value === nothing
+                                continue
                             end
                             @debug "Overwriting $(key) to $(value) using scene file"
                             Base.invokelatest(setfield!, newScript, key, value)
