@@ -20,7 +20,7 @@ module SceneLoaderModule
         JulGame.BasePath = JulGame.BasePath == "" ? projectPath : JulGame.BasePath
         #println("Loading scene $sceneFileName from $projectPath")
         scene = Scene(sceneFileName, projectPath)
-        return SceneBuilderModule.load_and_prepare_scene(scene, "Editor")
+        return SceneBuilderModule.load_and_prepare_scene(nothing; this=scene)
     end
     
     export load_scene_from_editor
@@ -46,11 +46,10 @@ module SceneLoaderModule
         if renderer !== nothing
             JulGame.Renderer::Ptr{SDL2.SDL_Renderer} = renderer
         end
-        JulGame.MAIN = JulGame.Main(Float64(1.0))
-        #println("Loading scene $sceneFileName from $projectPath")
+        @debug ("Loading scene $sceneFileName from $projectPath")
         scene = Scene("$sceneFileName", "$projectPath")
         
-        SceneBuilderModule.load_and_prepare_scene(;this=scene)
+        SceneBuilderModule.load_and_prepare_scene(JulGame.Main(Float64(1.0)); this=scene)
 
         return MAIN
     end

@@ -8,7 +8,7 @@ module PlatformerModule
         JulGame.PIXELS_PER_UNIT = 16
         scene = JulGame.SceneBuilderModule.Scene("level_0.json")
         try
-            SceneBuilderModule.load_and_prepare_scene(;this=scene)
+            SceneBuilderModule.load_and_prepare_scene(JulGame.MAIN;this=scene)
         catch e
             @error e
             Base.show_backtrace(stderr, catch_backtrace())

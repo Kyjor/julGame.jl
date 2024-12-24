@@ -1,5 +1,5 @@
 module CameraModule
-    using JulGame
+    using ..JulGame
     using .Math
 
     export Camera

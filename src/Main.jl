@@ -139,7 +139,7 @@ module MainLoop
 							rethrow(e)
 						else
 							if typeof(e) != ErrorException
-								println("Error shutting down script")
+								println("Error shutting down script: $(typeof(script))")
 								Base.show_backtrace(stdout, catch_backtrace())
 							end
 						end
@@ -336,7 +336,7 @@ function JulGame.change_scene(sceneFileName::String)
 						rethrow(e)
 					else
 						if typeof(e) != ErrorException
-							println("Error shutting down script")
+							println("Error shutting down script: $(typeof(script))")
 							@error string(e)
 							Base.show_backtrace(stdout, catch_backtrace())
 						end

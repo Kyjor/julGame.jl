@@ -16,13 +16,13 @@ module SceneBuilderModule
             println("Loading scripts in test folder...")
             include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "projects", "ProfilingTest", "Platformer", "scripts"); join=true)))
             include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "projects", "SmokeTest", "scripts"); join=true)))
-            @info "Loaded test scripts"
+            @debug "Loaded test scripts"
         end
 
         if isdir(joinpath(pwd(), "..", "scripts")) #dev builds
             # println("Loading scripts...")
             include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
-            @info "Loaded scripts"
+            @debug "Loaded scripts"
         else
             script_folder_name = "scripts"
             current_dir = pwd()
@@ -34,12 +34,12 @@ module SceneBuilderModule
             for folder in folders
                 scripts_path = joinpath(current_dir, folder, script_folder_name)
                 if isdir(scripts_path)
-                    println("Loading scripts in $scripts_path...")
+                    @debug("Loading scripts in $scripts_path...")
                     include.(filter(contains(r".jl$"), readdir(scripts_path; join=true)))
                     break  # Exit loop if "scripts" folder is found in any parent folder
                 end
             end
-            @info "Loaded scripts"
+            @debug "Loaded scripts"
         end
     end
 
@@ -70,7 +70,7 @@ module SceneBuilderModule
         end    
     end
     
-    function load_and_prepare_scene(;this::Scene, config=parse_config(), globals = [])
+    function load_and_prepare_scene(main; this::Scene, config=parse_config(), globals = [])
         config = fill_in_config(config)
 
         windowName::String = get(config, "WindowName", DEFAULT_CONFIG["WindowName"])
@@ -84,6 +84,9 @@ module SceneBuilderModule
              zoom = 1.0
         end
 
+        if main !== nothing
+            JulGame.MAIN = main
+        end
         MAIN.windowName = windowName
         MAIN.zoom = zoom
         MAIN.globals = globals
@@ -225,8 +228,10 @@ module SceneBuilderModule
                                 value = Float64(value)
                             elseif ftype == Int32
                                 value = Int32(value)
+                            elseif value === nothing
+                                continue
                             end
-    
+                            @debug "Overwriting $(key) to $(value) using scene file"
                             Base.invokelatest(setfield!, newScript, key, value)
                         catch e
                             @warn string(e)

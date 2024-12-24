@@ -7,7 +7,7 @@ module SmokeTest
         MAIN.currentTestTime = 0.0
         
         try
-            SceneBuilderModule.load_and_prepare_scene(;this=SceneBuilderModule.Scene("scene.json", SMOKETESTDIR), globals=[Test])
+            SceneBuilderModule.load_and_prepare_scene(JulGame.MAIN;this=SceneBuilderModule.Scene("scene.json", SMOKETESTDIR), globals=[Test])
         catch e
             @error e
             Base.show_backtrace(stderr, catch_backtrace())
