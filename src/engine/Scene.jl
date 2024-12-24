@@ -57,5 +57,17 @@
         @warn "No entity with id $id found"
         return nothing
     end
+
+    function get_ui_element_by_name(this::Scene, name)
+        for entity in this.uiElements
+            if entity.name == name
+                return entity
+            end
+        end
+
+        @warn "No entity with name $name found"
+        return nothing
+    end
+
 end
 

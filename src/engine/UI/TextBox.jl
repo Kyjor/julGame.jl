@@ -74,6 +74,7 @@ module TextBoxModule
         @info string("loading font from $(basePath)\\$(fontPath)")
         this.font = CallSDLFunction(SDL2.TTF_OpenFont, joinpath(basePath, fontPath), this.fontSize)
         if this.font == C_NULL
+            error("Failed to load font")
             return
         end
         if fontPath != joinpath("FiraCode-Regular.ttf")
