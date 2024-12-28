@@ -231,45 +231,45 @@ module InputModule
         
         # Uncomment to debug window events
         if windowEvent == SDL2.SDL_WINDOWEVENT_SHOWN
-            @info(string("Window $(event.window.windowID) shown"))
+            @debug(string("Window $(event.window.windowID) shown"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_HIDDEN
-            @info(string("Window $(event.window.windowID) hidden"))
+            @debug(string("Window $(event.window.windowID) hidden"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_EXPOSED
-            @info(string("Window $(event.window.windowID) exposed"))
+            @debug(string("Window $(event.window.windowID) exposed"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_MOVED
-            @info(string("Window $(event.window.windowID) moved to $(event.window.data1),$(event.window.data2)"))
+            @debug(string("Window $(event.window.windowID) moved to $(event.window.data1),$(event.window.data2)"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_RESIZED # todo: update zoom and viewport size here
             if !JulGame.IS_EDITOR
-                @info(string("Window $(event.window.windowID) resized to $(event.window.data1)x$(event.window.data2)"))
+                @debug(string("Window $(event.window.windowID) resized to $(event.window.data1)x$(event.window.data2)"))
                 JulGame.MainLoop.update_viewport(MAIN, event.window.data1, event.window.data2)
             end
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_SIZE_CHANGED
-            @info(string("Window $(event.window.windowID) size changed to $(event.window.data1)x$(event.window.data2)"))
+            @debug(string("Window $(event.window.windowID) size changed to $(event.window.data1)x$(event.window.data2)"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_MINIMIZED
-            @info(string("Window $(event.window.windowID) minimized"))
+            @debug(string("Window $(event.window.windowID) minimized"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_MAXIMIZED
-            @info(string("Window $(event.window.windowID) maximized"))
+            @debug(string("Window $(event.window.windowID) maximized"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_RESTORED
-            @info(string("Window $(event.window.windowID) restored"))
+            @debug(string("Window $(event.window.windowID) restored"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_ENTER
-            @info(string("Mouse entered window $(event.window.windowID)"))
+            @debug(string("Mouse entered window $(event.window.windowID)"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_LEAVE
-            @info(string("Mouse left window $(event.window.windowID)"))
+            @debug(string("Mouse left window $(event.window.windowID)"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_FOCUS_GAINED
-            @info(string("Window $(event.window.windowID) gained keyboard focus"))
+            @debug(string("Window $(event.window.windowID) gained keyboard focus"))
             this.isWindowFocused = true
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_FOCUS_LOST
-            @info(string("Window $(event.window.windowID) lost keyboard focus"))
+            @debug(string("Window $(event.window.windowID) lost keyboard focus"))
             this.isWindowFocused = false
 
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_CLOSE
-            @info(string("Window $(event.window.windowID) closed"))
+            @debug(string("Window $(event.window.windowID) closed"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_TAKE_FOCUS
-            @info(string("Window $(event.window.windowID) is offered a focus"))
+            @debug(string("Window $(event.window.windowID) is offered a focus"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_HIT_TEST
-            @info(string("Window $(event.window.windowID) has a special hit test"))
+            @debug(string("Window $(event.window.windowID) has a special hit test"))
         else
-            @info(string("Window $(event.window.windowID) got unknown event $(event.window.event)"))   
+            @debug(string("Window $(event.window.windowID) got unknown event $(event.window.event)"))   
         end    
     end
 
