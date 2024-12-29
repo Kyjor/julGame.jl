@@ -147,7 +147,9 @@ module SceneBuilderModule
             push!(MAIN.scene.entities, entity)
         end
 
-        MAIN.scene.uiElements = scene[2]
+        for uiElement in scene[2]
+            push!(MAIN.scene.uiElements, uiElement)
+        end
 
         for uiElement in MAIN.scene.uiElements
             if "$(typeof(uiElement))" == "JulGame.UI.TextBoxModule.Textbox" && uiElement.isWorldEntity

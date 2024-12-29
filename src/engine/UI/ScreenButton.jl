@@ -118,11 +118,11 @@ module ScreenButtonModule
 
     function UI.handle_event(this::ScreenButton, evt, x, y)
         if evt.type == evt.type == SDL2.SDL_MOUSEBUTTONDOWN
-            this.currentTexture = this.buttonDownTexture
+        this.currentTexture = this.buttonDownTexture
         elseif evt.type == SDL2.SDL_MOUSEBUTTONUP
             this.currentTexture = this.buttonUpTexture
             for eventToCall in this.clickEvents
-                eventToCall()
+                Base.invokelatest(eventToCall,(evt = evt, x = x, y = y))
             end
         elseif evt.type == SDL2.SDL_MOUSEMOTION
             #println("mouse move")
