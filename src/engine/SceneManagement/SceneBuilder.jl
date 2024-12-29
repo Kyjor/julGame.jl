@@ -63,7 +63,14 @@ module SceneBuilderModule
             this = new()  
 
             this.scene = sceneFileName
-            this.srcPath = srcPath
+            this.srcPath = srcPath 
+
+            path = Base.load_path()[1]
+            JulGame.IS_PACKAGE_COMPILED = occursin("share", path) && occursin("Project.toml", path)
+            if Sys.isapple() && JulGame.IS_PACKAGE_COMPILED
+                srcPath = joinpath(join(split(path, "/")[1:findfirst(x -> x == "Build", split(path, "/"))], "/"))
+            end
+
             JulGame.BasePath = srcPath
 
             return this
@@ -204,7 +211,9 @@ module SceneBuilderModule
         @debug string("Adding scripts to entities")
         @debug string("Path: ", path)
         @debug string("Entities: ", length(MAIN.scene.entities))
-        include.(filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
+        if !JulGame.IS_PACKAGE_COMPILED
+            include.(filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
+        end
 
         for entity in MAIN.scene.entities
             scriptCounter = 1

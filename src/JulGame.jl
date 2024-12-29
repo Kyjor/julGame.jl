@@ -4,6 +4,7 @@ module JulGame
     const SDL2 = SimpleDirectMediaLayer
     MAIN = nothing
     IS_EDITOR = false
+    IS_PACKAGE_COMPILED::Bool = false
     DELTA_TIME = 0.0
 
     include("ModuleExtensions/SDL2Extension.jl")
