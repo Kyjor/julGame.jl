@@ -147,7 +147,7 @@ module MainLoop
             end
 			
             if !this.shouldChangeScene
-				@info "Closing window"
+				@debug "Closing window"
                 SDL2.SDL_DestroyRenderer(JulGame.Renderer::Ptr{SDL2.SDL_Renderer})
                 SDL2.SDL_DestroyWindow(this.window)
                 SDL2.Mix_Quit()
@@ -188,7 +188,7 @@ module MainLoop
 		
 		if this.scene.camera !== nothing
 			this.scene.camera.startingCoordinates = Math.Vector2f(round(x/2) - round(this.scene.camera.size.x/2*this.zoom), round(y/2) - round(this.scene.camera.size.y/2*this.zoom))																																				
-			@info string("Set viewport to: ", this.scene.camera.startingCoordinates)
+			@debug string("Set viewport to: ", this.scene.camera.startingCoordinates)
 			SDL2.SDL_RenderSetViewport(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, Ref(SDL2.SDL_Rect(this.scene.camera.startingCoordinates.x, this.scene.camera.startingCoordinates.y, round(this.scene.camera.size.x*this.zoom), round(this.scene.camera.size.y*this.zoom))))
 		end
 
@@ -232,7 +232,7 @@ module MainLoop
 
 		if this.scene.camera !== nothing
 			this.scene.camera.startingCoordinates = Math.Vector2f(round(size.x/2) - round(this.scene.camera.size.x/2*this.zoom), round(size.y/2) - round(this.scene.camera.size.y/2*this.zoom))																																				
-			@info string("Set viewport to: ", this.scene.camera.startingCoordinates)
+			@debug string("Set viewport to: ", this.scene.camera.startingCoordinates)
 			SDL2.SDL_RenderSetViewport(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, Ref(SDL2.SDL_Rect(this.scene.camera.startingCoordinates.x, this.scene.camera.startingCoordinates.y, round(this.scene.camera.size.x*this.zoom), round(this.scene.camera.size.y*this.zoom))))
 		end
 
@@ -590,7 +590,7 @@ function game_loop(this::Main, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhys
 					try
                         JulGame.update(entity, deltaTime)
 						if this.close && !this.isGameModeRunningInEditor
-							@info "Closing game"
+							@debug "Closing game"
 							return
 						end
 					catch e

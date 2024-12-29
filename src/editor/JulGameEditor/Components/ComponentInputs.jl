@@ -442,7 +442,7 @@ function show_screenbutton_fields1(screenButton)
             elseif fieldString == "buttonUpSpritePath"
                 imageMenuValue = display_files(joinpath(JulGame.BasePath, "assets", "images"), "images", "button up")
                 if imageMenuValue != ""
-                    @info String("loading button up: $imageMenuValue")
+                    @debug String("loading button up: $imageMenuValue")
                     # remove joinpath("assets", "images") from imageMenuValue and set it to imagePath
                     imagePath = replace(imageMenuValue, joinpath(JulGame.BasePath, "assets", "images") => "")
                     # remove leading / or \\ from imagePath
@@ -455,7 +455,7 @@ function show_screenbutton_fields1(screenButton)
             elseif fieldString == "buttonDownSpritePath"
                 imageMenuValue = display_files(joinpath(JulGame.BasePath, "assets", "images"), "images", "button down")
                 if imageMenuValue != ""
-                    @info String("loading button up: $imageMenuValue")
+                    @debug String("loading button up: $imageMenuValue")
                     # remove joinpath("assets", "images") from imageMenuValue and set it to imagePath
                     imagePath = replace(imageMenuValue, joinpath(JulGame.BasePath, "assets", "images") => "")
                     # remove leading / or \\ from imagePath

@@ -71,7 +71,7 @@ module TextBoxModule
     end
 
     function UI.load_font(this::TextBox, basePath::String, fontPath::String)
-        @info string("loading font from $(basePath)\\$(fontPath)")
+        @debug string("loading font from $(basePath)\\$(fontPath)")
         this.font = CallSDLFunction(SDL2.TTF_OpenFont, joinpath(basePath, fontPath), this.fontSize)
         if this.font == C_NULL
             error("Failed to load font")

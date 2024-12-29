@@ -516,7 +516,7 @@ module Editor
                             end
 
                             if JulGame.InputModule.get_button_held_down(currentSceneMain.input, "LCTRL") && JulGame.InputModule.get_button_pressed(currentSceneMain.input, "S")
-                                @info string("Saving scene")
+                                @debug string("Saving scene")
                                 events["Save"]()
                             end
                             # delete selected entity
@@ -536,13 +536,13 @@ module Editor
                             if JulGame.InputModule.get_button_held_down(currentSceneMain.input, "LCTRL") && JulGame.InputModule.get_button_held_down(currentSceneMain.input, "LSHIFT") && JulGame.InputModule.get_button_pressed(currentSceneMain.input, "D") && currentSceneMain.selectedEntity !== nothing
                                 duplicationMode = !duplicationMode
                                 if duplicationMode
-                                    @info "Duplication mode on"
+                                    @debug "Duplication mode on"
                                     copy = deepcopy(currentSceneMain.selectedEntity)
                                     copy.id = JulGame.generate_uuid()
                                     push!(currentSceneMain.scene.entities, copy)
                                     currentSceneMain.selectedEntity = copy
                                 else
-                                    @info "Duplication mode off"
+                                    @debug "Duplication mode off"
                                     JulGame.destroy_entity(currentSceneMain, currentSceneMain.selectedEntity)
                                 end
                             end
@@ -582,7 +582,7 @@ module Editor
             end
         catch e
             backup_file_name = backup_file_name = "$(replace(currentSceneName, ".json" => ""))-backup-$(replace(Dates.format(Dates.now(), "yyyy-mm-ddTHH:MM:SS"), ":" => "-")).json"
-            @info string("Backup file name: ", backup_file_name)
+            @debug string("Backup file name: ", backup_file_name)
             SceneWriterModule.serialize_entities(currentSceneMain.scene.entities, currentSceneMain.scene.uiElements, gameCamera, currentSelectedProjectPath[], backup_file_name)
             Base.show_backtrace(stderr, catch_backtrace())
             @warn "Error in renderloop!" exception=e
@@ -611,7 +611,7 @@ module Editor
             file = top_frame.file
             line = top_frame.line
         else
-            @info("Stack trace is empty.")
+            @debug("Stack trace is empty.")
         end
 
         log_exceptions(error_location, latest_exceptions, e, "$(file):$(line)", is_test_mode)
@@ -689,7 +689,7 @@ module Editor
             end
         end
 
-        @info "Saved config file to $(filename)"
+        @debug "Saved config file to $(filename)"
     end
 
     function load_project_config(currentSelectedProjectPath)

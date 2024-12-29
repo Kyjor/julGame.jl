@@ -15,7 +15,7 @@ module SceneWriterModule
 
     """
     function serialize_entities(entities::Array, uiElements::Array, camera, projectPath, sceneName)
-        @info String("Serializing entities")
+        @debug String("Serializing entities")
         entitiesDict = []
         uiElementsDict = []
         
@@ -70,7 +70,7 @@ module SceneWriterModule
             )
         try
             name = split(sceneName,".")[1]
-            @info "writing to $(joinpath(projectPath, "scenes", "$(sceneName)"))"
+            @debug "writing to $(joinpath(projectPath, "scenes", "$(sceneName)"))"
 
             open(joinpath(projectPath, "scenes", "$(name)-saving"), "w") do io
                 JSON3.pretty(io, entitiesJson)
