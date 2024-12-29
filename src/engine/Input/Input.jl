@@ -19,7 +19,6 @@ module InputModule
         joystick
         scanCodeStrings::Vector{String}
         scanCodes::Vector
-        scene
         quit::Bool
         
         #Gamepad
@@ -100,7 +99,7 @@ module InputModule
             end
             if evt.type == SDL2.SDL_MOUSEMOTION || evt.type == SDL2.SDL_MOUSEBUTTONDOWN || evt.type == SDL2.SDL_MOUSEBUTTONUP
                 didMouseEventOccur = true
-                if this.scene.uiElements !== nothing
+                if MAIN.scene.uiElements !== nothing
                     x,y = Int32[1], Int32[1]
                     SDL2.SDL_GetMouseState(pointer(x), pointer(y))
                     
@@ -110,7 +109,7 @@ module InputModule
                         continue
                     end
 
-                    for screenButton in this.scene.uiElements
+                    for screenButton in MAIN.scene.uiElements
                         if split("$(typeof(screenButton))", ".")[end] != "ScreenButton"
                             continue
                         end

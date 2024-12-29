@@ -140,8 +140,8 @@ module SceneBuilderModule
     function deserialize_and_build_scene(this::Scene)
         scene = deserialize_scene(joinpath(BasePath, "scenes", this.scene))
         
-        @info String("Changing scene to $this.scene")
-        @info String("Entities in main scene: $(length(MAIN.scene.entities))")
+        @debug String("Changing scene to $(this.scene)")
+        @debug String("Entities in main scene: $(length(MAIN.scene.entities))")
 
         for entity in scene[1]
             push!(MAIN.scene.entities, entity)
@@ -201,9 +201,9 @@ module SceneBuilderModule
     end
 
     function add_scripts_to_entities(path::String)
-        @info string("Adding scripts to entities")
-        @info string("Path: ", path)
-        @info string("Entities: ", length(MAIN.scene.entities))
+        @debug string("Adding scripts to entities")
+        @debug string("Path: ", path)
+        @debug string("Entities: ", length(MAIN.scene.entities))
         include.(filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
 
         for entity in MAIN.scene.entities
@@ -213,7 +213,7 @@ module SceneBuilderModule
                     scriptCounter += 1
                     continue
                 end
-                @info String("Adding script: $(script.name) to entity: $(entity.name)")
+                @debug String("Adding script: $(script.name) to entity: $(entity.name)")
 
                 newScript = nothing
                 try

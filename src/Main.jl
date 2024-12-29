@@ -47,7 +47,6 @@ module MainLoop
 
 			this.close = false
 			this.debugTextBoxes = UI.TextBoxModule.TextBox[]
-			this.input.scene = this.scene
 			this.isWindowFocused = false
 			this.mousePositionWorld = Math.Vector2f()
 			this.optimizeSpriteRendering = false
