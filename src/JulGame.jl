@@ -8,6 +8,9 @@ module JulGame
     DELTA_TIME = 0.0
     # TODO: Create a globals file
     SCENE_CACHE::Dict = Dict{String, Any}()
+    IMAGE_CACHE::Dict = Dict{String, Any}()
+    FONT_CACHE::Dict = Dict{String, Any}()
+    AUDIO_CACHE::Dict = Dict{String, Any}()
 
     include("ModuleExtensions/SDL2Extension.jl")
     const SDL2E = SDL2Extension
