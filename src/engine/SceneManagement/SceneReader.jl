@@ -24,8 +24,16 @@ module SceneReaderModule
     export deserialize_scene
     function deserialize_scene(filePath)
         try
-            entitiesJson = read(filePath, String)
-            json = JSON3.read(entitiesJson)
+            json = nothing
+            if haskey(JulGame.SCENE_CACHE, basename(filePath))
+                json = JulGame.SCENE_CACHE[basename(filePath)]
+                @debug("using cached scene")
+            else 
+                entitiesJson = read(filePath, String)
+                json = JSON3.read(entitiesJson)
+                @debug("using scene from scene file")
+            end
+
             entities = []
             uiElements = []
             res = []

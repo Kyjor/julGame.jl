@@ -6,6 +6,8 @@ module JulGame
     IS_EDITOR = false
     IS_PACKAGE_COMPILED::Bool = false
     DELTA_TIME = 0.0
+    # TODO: Create a globals file
+    SCENE_CACHE::Dict = Dict{String, Any}()
 
     include("ModuleExtensions/SDL2Extension.jl")
     const SDL2E = SDL2Extension
