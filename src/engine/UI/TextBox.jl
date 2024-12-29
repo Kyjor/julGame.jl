@@ -20,10 +20,12 @@ module TextBoxModule
         size::Vector2
         text::String
         textTexture
+        isConstructed::Bool
 
         function TextBox(name::String, fontPath::String, fontSize::Number, position::Math.Vector2, text::String, isCenteredX::Bool = false, isCenteredY::Bool = false; isWorldEntity::Bool=false) # TODO: replace bool with enum { left, center, right, etc }
             this = new()
 
+            this.isConstructed = false
             this.alpha = 255
             this.fontPath = fontPath
             this.fontSize = Int32(fontSize)
@@ -37,12 +39,15 @@ module TextBoxModule
             this.textTexture = C_NULL
             this.persistentBetweenScenes = false
             this.isActive = true
+            this.renderText = C_NULL
+
             
             if fontPath == ""
                 fontPath = joinpath("FiraCode-Regular.ttf")
             end
 
             UI.load_font(this, joinpath(BasePath, "assets", "fonts"), fontPath)
+            this.isConstructed = true
 
             return this
         end
@@ -106,8 +111,13 @@ module TextBoxModule
     # Examples
     """
     function UI.rerender_text(this::TextBox)
-        SDL2.SDL_FreeSurface(this.renderText)
-        SDL2.SDL_DestroyTexture(this.textTexture)
+        if this.renderText != C_NULL
+            SDL2.SDL_FreeSurface(this.renderText)
+        end
+        if this.textTexture != C_NULL
+            SDL2.SDL_DestroyTexture(this.textTexture)
+        end
+
         this.renderText = SDL2.TTF_RenderUTF8_Blended(this.font, this.text, SDL2.SDL_Color(255,255,255,(this.alpha+1)%256))
         surface = unsafe_wrap(Array, this.renderText, 10; own = false)
 
@@ -162,12 +172,13 @@ module TextBoxModule
         @debug("setting textbox property $(s) to: $(x)")
         try
             setfield!(this, s, x)
-            if s == :text
+            if s == :text || s == :alpha
                 if length(x) == 0
                     setfield!(this, s, " ")# prevents segfault when text is empty
                 end
-
-                UI.rerender_text(this)
+                if this.isConstructed
+                    UI.rerender_text(this) # this line MUST stay inside the if for specific fields as we can't call this on fields that are used in this function
+                end
             end
         catch e
             error(e)
