@@ -172,7 +172,7 @@ module TextBoxModule
         @debug("setting textbox property $(s) to: $(x)")
         try
             setfield!(this, s, x)
-            if s == :text || s == :alpha
+            if s == :text || s == :alpha || s == :isActive
                 if length(x) == 0
                     setfield!(this, s, " ")# prevents segfault when text is empty
                 end
