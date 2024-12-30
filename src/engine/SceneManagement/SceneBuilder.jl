@@ -243,7 +243,7 @@ module SceneBuilderModule
                                 continue
                             end
                             @debug "Overwriting $(key) to $(value) using scene file"
-                            Base.invokelatest(setfield!, newScript, key, value)
+                            Base.invokelatest(setfield!, newScript, key, EditorExport(value))
                         catch e
                             @warn string(e)
                         end

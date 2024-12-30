@@ -573,10 +573,9 @@ function show_script_editor(entity, newScriptText)
 
                 CImGui.Button("Delete $(i)") && (deleteat!(entity.scripts, i); return;)
                 for field in fieldnames(typeof(entity.scripts[i]))
-                    if field == :parent 
+                    if field == :parent || !(fieldtype(typeof(entity.scripts[i]), field) <: EditorExport)
                         continue
                     end
-
                     if isdefined(entity.scripts[i], Symbol(field)) 
                         display_script_field_input(entity.scripts[i], field)
                     else 
@@ -592,9 +591,9 @@ function show_script_editor(entity, newScriptText)
 end
 
 function display_script_field_input(script, field)
-    ftype = fieldtype(typeof(script), field)
+    ftype = typeof(getproperty(script, field))
     if ftype == String
-        buf = "$(getfield(script, field))"*"\0"^(64)
+        buf = "$(getproperty(script, field))"*"\0"^(64)
         CImGui.InputText("$(field)", buf, length(buf))
         currentTextInTextBox = ""
         for characterIndex = eachindex(buf)
@@ -605,33 +604,33 @@ function display_script_field_input(script, field)
                 break
             end
         end
-        setfield!(script, field, currentTextInTextBox)
+        setproperty!(script, field, currentTextInTextBox)
     elseif ftype == Float64 || ftype == Float32
-        x = ftype(getfield(script, field))
+        x = ftype(getproperty(script, field))
         x = Cfloat(x)
         @c CImGui.InputFloat("$(field)", &x, 1)
-        setfield!(script, field, ftype(x))
+        setproperty!(script, field, ftype(x))
     elseif ftype <: Int64 || ftype <: Int32 || ftype <: Int16 || ftype <: Int8
-        x = ftype(getfield(script, field))
+        x = ftype(getproperty(script, field))
         x = convert(Int32, x)
         @c CImGui.InputInt("$(field)", &x, 1)
         x = convert(ftype, x)
-        setfield!(script, field, x)
+        setproperty!(script, field, x)
     elseif ftype == Bool
-        x = getfield(script, field)
+        x = getproperty(script, field)
         @c CImGui.Checkbox("$(field)", &x)
-        setfield!(script, field, x)
+        setproperty!(script, field, x)
     end
 end
 
 function init_undefined_field(script, field)
-    ftype = fieldtype(typeof(script), field)
+    ftype = typeof(getproperty(script, field))
     if ftype == String
-        setfield!(script, field, "")
+        setproperty!(script, field, "")
     elseif ftype <: Number
-        setfield!(script, field, 0)
+        setproperty!(script, field, 0)
     elseif ftype == Bool
-        setfield!(script, field, false)
+        setproperty!(script, field, false)
     end
 end
 

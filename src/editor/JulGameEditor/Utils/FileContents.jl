@@ -77,12 +77,12 @@ end
 function newScriptContent(scriptName)
     return "module $(scriptName)Module
     using ..JulGame
-    mutable struct $scriptName
-    parent # do not remove this line, this is a reference to the entity that this script is attached to
-    # This is where you define your script's fields
-    # Example: speed::Float64
+    mutable struct $(scriptName) <: Script
+        parent # do not remove this line, this is a reference to the entity that this script is attached to
+        # This is where you define your script's fields
+        # Example: speed::Float64
 
-        function $scriptName()
+        function $(scriptName)()
             this = new() # do not remove this line
             
             # this is where you initialize your script's fields

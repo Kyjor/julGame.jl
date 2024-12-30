@@ -1,4 +1,5 @@
 module SceneWriterModule
+    using ...JulGame
     using JSON3
     
     export serialize_entities
@@ -241,11 +242,12 @@ module SceneWriterModule
                 val = nothing
                 if isdefined(script, Symbol(field))
                     val = getfield(script, field)
-                    if typeof(val) <: AbstractArray
-                        val = nothing
+                    if !isa(val, EditorExport)
+                        continue
                     end
+                    val = val.value
                 else 
-                    val = set_undefined_field(script, field)
+                    continue
                 end
                 fields["$(field)"] = val
             end

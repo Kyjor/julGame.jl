@@ -16,6 +16,12 @@ module JulGame
     const SDL2E = SDL2Extension
     export DELTA_TIME, IS_EDITOR, SDL2, SDL2E, MAIN
 
+    include("utils/Structs.jl")
+    export EditorExport
+    
+    include("utils/Types.jl")
+    export Script
+
     include("utils/Utils.jl")
     export CallSDLFunction
 
