@@ -52,6 +52,7 @@ module SceneReaderModule
                 newEntity = Entity(get(entity, "name", "New entity"), string(entity.id))
                 newEntity.isActive = get(entity, "isActive", true)
                 newEntity.scripts = get(entity, "scripts", [])
+                newEntity.persistentBetweenScenes = get(entity, "persistentBetweenScenes", false)
 
                 for component in components
                     if typeof(component) == Animator
@@ -126,7 +127,7 @@ module SceneReaderModule
                 else
                     newUIElement = ScreenButton(uiElement.name, uiElement.buttonUpSpritePath, uiElement.buttonDownSpritePath, Vector2(uiElement.size.x, uiElement.size.y), Vector2(uiElement.position.x, uiElement.position.y), uiElement.fontPath, uiElement.text, Vector2(uiElement.textOffset.x, uiElement.textOffset.y))
                 end
-                
+                newUIElement.persistentBetweenScenes = get(uiElement, "persistentBetweenScenes", false)
                 push!(res, newUIElement)
             catch e 
                 @error string(e)

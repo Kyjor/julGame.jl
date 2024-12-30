@@ -21,7 +21,14 @@ module SceneWriterModule
         
         count = 1
         for entity in entities
-            push!(entitiesDict, Dict("id" => string(entity.id), "parent" =>  entity.parent != C_NULL ? entity.parent.id : C_NULL, "isActive" => entity.isActive, "name" => entity.name, "components" => serialize_entity_components([entity.animator, entity.collider, entity.circleCollider, entity.rigidbody, entity.shape, entity.soundSource, entity.sprite, entity.transform]), "scripts" => serialize_entity_scripts(entity.scripts)))
+            push!(entitiesDict, Dict(
+                "id" => string(entity.id), 
+                "parent" =>  entity.parent != C_NULL ? entity.parent.id : C_NULL, 
+                "isActive" => entity.isActive, 
+                "name" => entity.name, 
+                "persistentBetweenScenes" => entity.persistentBetweenScenes,
+                "components" => serialize_entity_components([entity.animator, entity.collider, entity.circleCollider, entity.rigidbody, entity.shape, entity.soundSource, entity.sprite, entity.transform]), 
+                "scripts" => serialize_entity_scripts(entity.scripts)))
             count += 1
         end
 

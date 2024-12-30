@@ -284,8 +284,8 @@ function initialize_scripts_and_components()
 		end 
 	end
               
-  MAIN.scene.rigidbodies = []
-  MAIN.scene.colliders = []
+	MAIN.scene.rigidbodies = []
+	MAIN.scene.colliders = []
 	for entity in MAIN.scene.entities
 		@debug "adding rigidbodies to global list"
 		if entity.rigidbody != C_NULL
