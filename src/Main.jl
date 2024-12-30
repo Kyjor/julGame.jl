@@ -313,13 +313,15 @@ function JulGame.change_scene(sceneFileName::String)
 	this.close = true
 	this.shouldChangeScene = true
 	#destroy current scene 
-	@debug  "Entities before destroying: $(length(this.scene.entities))" 
+	@debug "Entity count before destroying: $(length(this.scene.entities))" 
 	count = 0
 	skipcount = 0
 	persistentEntities = []	
+	entitiesToDestroy = []
+
 	for entity in this.scene.entities
 		if entity.persistentBetweenScenes && (!JulGame.IS_EDITOR || this.isGameModeRunningInEditor)
-			#println("Persistent entity: ", entity.name, " with id: ", entity.id)
+			@debug("Persistent entity: ", entity.name, " with id: ", entity.id)
 			push!(persistentEntities, entity)
 			skipcount += 1
 			continue
@@ -344,8 +346,12 @@ function JulGame.change_scene(sceneFileName::String)
 			end
 		end
 
-		JulGame.destroy_entity(this, entity)
+		push!(entitiesToDestroy, entity)
 		count += 1
+	end
+
+	for entity in entitiesToDestroy
+		JulGame.destroy_entity(this, entity)
 	end
 	@debug "Destroyed $count entities while changing scenes"
 	@debug "Skipped $skipcount entities while changing scenes"
