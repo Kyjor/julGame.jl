@@ -14,8 +14,24 @@ module SceneBuilderModule
         # if end of path is "test", then we are running tests
         if endswith(pwd(), "test")
             println("Loading scripts in test folder...")
-            include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "projects", "ProfilingTest", "Platformer", "scripts"); join=true)))
-            include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "projects", "SmokeTest", "scripts"); join=true)))
+        
+            # Define the paths to the directories
+            test_dir_1 = joinpath(pwd(), "projects", "ProfilingTest", "Platformer", "scripts")
+            test_dir_2 = joinpath(pwd(), "projects", "SmokeTest", "scripts")
+        
+            # Check if the directories exist before attempting to read them
+            if isdir(test_dir_1)
+                include.(filter(contains(r".jl$"), readdir(test_dir_1; join=true)))
+            else
+                println("Directory not found: $test_dir_1")
+            end
+        
+            if isdir(test_dir_2)
+                include.(filter(contains(r".jl$"), readdir(test_dir_2; join=true)))
+            else
+                println("Directory not found: $test_dir_2")
+            end
+        
             @debug "Loaded test scripts"
         end
 
