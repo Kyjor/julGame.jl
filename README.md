@@ -1,5 +1,7 @@
 [![codecov](https://codecov.io/gh/Kyjor/JulGame.jl/graph/badge.svg?token=535VSQ21MJ)](https://codecov.io/gh/Kyjor/JulGame.jl)
-[Documentation is in progress!](https://docs.kyjor.io/JulGame.jl)
+
+[Documentation](https://docs.kyjor.io/JulGame.jl)
+
 [Trello board](https://trello.com/b/M6uH0Jmy/julgame)
 ![JulGame Logo](https://github.com/Kyjor/JulGame.jl/assets/13784123/f68ece3a-62a1-48fb-a905-c7c8b9aa35c1)
 
@@ -13,7 +15,7 @@
 
 ## Support
 
-If you want to support development, feel free to check out my [discord server](https://discord.gg/RGMkdzW), or my [YouTube channel](https://www.youtube.com/@kyjor_) where I make videos about game development: 
+If you want to support development, feel free to check out my [discord server](https://discord.gg/RGMkdzW), or my [YouTube channel](https://www.youtube.com/@kyjor_) where I make videos about game development
 
 ## What is JulGame?
 
@@ -31,23 +33,23 @@ I thought that JulGame would be a great play on Pygame. I also think it just rol
 
 `] add JulGame` for the latest in the package manager
 
-`] add https://github.com/Kyjor/JulGame.jl` for main - RECOMMENDED as any bug fixes will immediately go here.
+`] add https://github.com/Kyjor/JulGame.jl` for main - RECOMMENDED as this should be the most stable branch.
 
-`] add https://github.com/Kyjor/JulGame.jl#develop` for develop
+`] add https://github.com/Kyjor/JulGame.jl#develop` for develop, which will have bleeding edge changes.
 
 Either download the latest release of the editor, or run it by navigating to `JulGame\src\editor\Editor\src\Editor.jl`
 and run `julia Editor.jl`
 
 ## How do you use it?
 
-Once you have the editor open, download the [example](https://github.com/Kyjor/JulGame-Example), unzip it, and then enter the path to the root of the project along with the scene name (scene.json) in the editor under the `Project Location` window. Poke and prod around to figure things out until we have some real docs :) 
+Once you have the editor open, download the [example](https://github.com/Kyjor/JulGame-Example), unzip it, and then open the folder with the editor. 
 
-🔴Warning🔴 Save often! The editor will crash with no remorse! Any big changes you make, save immediately.
+🔴Warning🔴 Save often! The editor may crash! We do attempt to save a backup for unhandled errors though. But it is better to be safe than sorry.
 
 ![JulGameEditorOpenScene](https://github.com/Kyjor/JulGame.jl/assets/13784123/0e1ab178-c28e-4c9e-b820-6f2d17916085)
 
 ### How do you run your scene?
-Navigate to your project, and cd to the directory with `Entry.jl`, and run `julia Entry.jl`, and it should start!
+Navigate to your project, and cd to the directory with `Run.jl`, and run `julia Run.jl`, and it should start!
 
 ## What needs to be done?
 #### General 
@@ -55,44 +57,43 @@ Navigate to your project, and cd to the directory with `Entry.jl`, and run `juli
 - [ ] Video tutorial
 ### 2D Engine
 #### General
-- [ ] Entities can be children of other entities, with editor support
-- [ ] Tests
+- [x] Entities can be children of other entities, with editor support
+- [x] Tests (continuously improving)
 - [ ] Prefabs (like Unity Engine)
 - [ ] Engine time system
 #### Visuals
 - [X] Simple Rendering
 - [ ] Basic particle system
 #### Physics
-- [ ] Better physics in general
-- [ ] More efficient collision handling
+- [ ] Implement box2d support
 - [ ] Raycasting
 #### Animation
-- [ ] More options than just item crop
+- [ ] Animate all properties of entites
 #### Input
 - [ ] Controller support
 #### Scene Management
-- [ ] Multiple scene support
+- [x] Multiple scene support
 #### Editor Features
-- [ ] Sprite cropping tool for animations
+- [x] Sprite cropping tool for animations
 - [ ] Hot reloading with [Revise.jl](https://github.com/timholy/Revise.jl) if possible
 - [ ] Profiling 
-- [ ] Debug console
-- [ ] A better way to display the scene. There is no SDL backend support for the port of CImGui, so we are stuck rendering two separate windows at the moment
-- [ ] Scene Grid
-- [ ] API
-- [ ] Tile map editor
-- [ ] Multi-select entities
+- [x] Debug console
+- [x] SDLRenderer Backend
+- [x] Scene Grid
+- [ ] Tilemap editor
+- [ ] Multi-select entities in hierarchy and editor (in progress...)
 - [ ] Right click context menus
 ### 3D Engine
-- [ ] 3D rendering
-- [ ] A robust list of 3D engine features...
+- [ ] SDL renderer geometry
+- [ ] OpenGL
+- [ ] WebGPU
 ### Build Support
 - [X] Windows
 - [ ] Mac
-- [ ] Linux - May have to use LDTK
-- [ ] Web ???
-- [ ] Mobile ???
-- [ ] Console ???
+- [ ] Linux
+- [ ] Web
+- [ ] Mobile
+- [ ] Console
 
 
 ## Inspirations/Credits
@@ -103,10 +104,10 @@ This is a list of references that I used in order to get JulGame where it is, al
 - and so many others who I will note some of in the future :)
 
 ## Games Made With JulGame
-Here I will be keeping a list for the first games created with JulGame :)
+Here I will be keeping a list for the first **original** games created with JulGame by external contributors (aka not me). If you would like to see games that I have made, check them out at https://kyjor.itch.io
 
-1. [The Jester](https://kyjor.itch.io/the-jester)
-2. [Coin Grabber](https://kyjor.itch.io/coin-grabber)
+1.
+2.
 3.
 4.
 5.

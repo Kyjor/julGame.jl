@@ -1,66 +1,53 @@
-using JulGame 
+module TitleModule
+    using ..JulGame
 
-mutable struct Title
-    fade
-    parent
-    textBox
+    mutable struct Title
+        fade
+        parent
+        textBox
 
-    function Title()
-        this = new()
+        function Title()
+            this = new()
 
-        this.fade = true
-        this.parent = C_NULL
-        this.textBox = C_NULL
+            this.fade = true
+            this.parent = C_NULL
+            this.textBox = C_NULL
 
-        return this
+            return this
+        end
     end
-end
 
-function Base.getproperty(this::Title, s::Symbol)
-    if s == :initialize
-        function()
-            this.textBox = MAIN.scene.uiElements[1]
-        end
-    elseif s == :update
-        function(deltaTime)
-            try
-                if this.fade 
-                    this.textBox.alpha -= 1
-                    this.textBox.updateText(this.textBox.text)
-                    if this.textBox.alpha <= 25
-                        this.fade = false
-                    end
-                else
-                    this.textBox.alpha += 1
-                    this.textBox.updateText(this.textBox.text)
-                    if this.textBox.alpha >= 250
-                        this.fade = true
-                    end
-                end
+    function JulGame.initialize(this::Title)
+        this.textBox = MAIN.scene.uiElements[1]
+    end
 
-                sound = this.parent.createSoundSource(JulGame.SoundSourceModule.SoundSource(Int32(-1), false, "confirm-ui.wav", Int32(50)))
-                sound.toggleSound()
-                MainLoop.change_scene("level_1.json")
-            catch e
-                println(e)
-				Base.show_backtrace(stdout, catch_backtrace())
-				rethrow(e)
-            end
-        end
-    elseif s == :setParent 
-        function(parent)
-            this.parent = parent
-        end
-    elseif s == :onShutDown
-        function ()
-        end
-    else
+    function JulGame.update(this::Title, deltaTime)
         try
-            getfield(this, s)
+            if this.fade 
+                this.textBox.alpha -= 1
+                this.textBox.text = this.textBox.text
+                if this.textBox.alpha <= 25
+                    this.fade = false
+                end
+            else
+                this.textBox.alpha += 1
+                this.textBox.text = this.textBox.text
+                if this.textBox.alpha >= 250
+                    this.fade = true
+                end
+            end
+
+            # sound = JulGame.create_sound_source(this.parent, JulGame.SoundSourceModule.SoundSource(Int32(-1), false, "confirm-ui.wav", Int32(50)))
+            # JulGame.Component.toggle_sound(sound)
+
+            JulGame.change_scene("level_1.json")
         catch e
-            println(e)
-			Base.show_backtrace(stdout, catch_backtrace())
-			rethrow(e)
+            @error string(e)
+            Base.show_backtrace(stdout, catch_backtrace())
+            rethrow(e)
         end
     end
-end
+
+    function JulGame.on_shutdown(this::Title)
+    end
+end # module

@@ -1,7 +1,6 @@
 function show_screenbutton_fields(selectedScreenButton, screenButtonField)
-    fieldName = getFieldName(screenButtonField)
+    fieldName = getFieldName1(screenButtonField)
     unusedFields = ["alpha","clickEvents", "currentTexture", "buttonDownSprite", "buttonDownSpritePath", "buttonDownTexture", "buttonUpSprite", "buttonUpSpritePath", "buttonUpTexture", "fontPath", "isInitialized", "mouseOverSprite", "textTexture"]
-    # TODO: 
     push!(unusedFields, "text")
     if fieldName in unusedFields
         return
@@ -53,7 +52,8 @@ function show_screenbutton_fields(selectedScreenButton, screenButtonField)
         @c CImGui.InputInt("$(screenButtonField) y", &y, 1)
         
         if x != Value.x || y != Value.y
-            selectedScreenButton.setVector2Value(screenButtonField, convert(Float64, x), convert(Float64, y))
+            #selectedScreenButton.setVector2Value(screenButtonField, convert(Float64, x), convert(Float64, y))
+            setfield!(selectedScreenButton, screenButtonField, Vector2(x, y))
             # JulGame.update_text(selectedScreenButton, selectedScreenButton.text)
         end
     elseif fieldName == "autoSizeText" || fieldName == "isCentered"
@@ -66,6 +66,6 @@ function show_screenbutton_fields(selectedScreenButton, screenButtonField)
     end
 end
 
-function getFieldName(field)
+function getFieldName1(field)
     return "$(field)"
 end

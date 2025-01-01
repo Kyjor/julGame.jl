@@ -57,7 +57,7 @@ function ShowDrag()
     end # @cstatic
 end
 
-function ShowHelpMarker(desc)
+function show_help_marker(desc)
     CImGui.TextDisabled("(?)")
     if CImGui.IsItemHovered()
         CImGui.BeginTooltip()

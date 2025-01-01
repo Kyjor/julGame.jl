@@ -6,8 +6,7 @@
             "scripts": [
                 {
                     "name": "TestScript",
-                    "parameters": [
-                    ]
+                    "fields": {}
                 }
             ],
             "id": 1,

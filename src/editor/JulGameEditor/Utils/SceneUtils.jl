@@ -34,15 +34,36 @@ An array of file paths to the JSON files found in the "scenes" folder.
 function get_all_scenes_from_folder(projectPath::String)
     sceneFiles = []
     try
+        # get all files in the scenes folder joinpath(projectPath, "scenes")
+        if !isdir(joinpath(projectPath, "scenes"))
+            @error "No scenes folder found in project directory: $projectPath"
+        else
+            for (root, dirs, files) in walkdir(joinpath(projectPath, "scenes"))
+                for file in files
+                    if occursin(r".json$", file)
+                        push!(sceneFiles, joinpath(root, file))
+                    end
+                end
+            end
+        end
+    catch e
+        rethrow(e)
+    end
+
+    return sceneFiles
+end
+
+function get_all_scenes_from_base_folder(projectPath::String)
+    sceneFiles = []
+    try
         # search through projectpath and it's subdirectories for a scenes folder. If it exists, return all of the json files from it
-        for (root, dirs, files) in walkdir(projectPath)
-            if "scenes" in dirs
-                for (root, dirs, files) in walkdir(joinpath(root, "scenes"))
-                    for file in files
-                        # println(file)
-                        if occursin(r".json$", file)
-                            push!(sceneFiles, joinpath(root, file))
-                        end
+        if !isdir(joinpath(projectPath, "scenes"))
+            @error "No scenes folder found in project directory: $projectPath"
+        else
+            for (root, dirs, files) in walkdir(joinpath(projectPath, "scenes"))
+                for file in files
+                    if occursin(r".json$", file)
+                        push!(sceneFiles, joinpath(root, file))
                     end
                 end
             end
@@ -55,16 +76,19 @@ function get_all_scenes_from_folder(projectPath::String)
 end
 
 """
-    choose_folder_with_dialog()
+    choose_project_filepath()
 
-Opens a dialog box to choose a folder.
+Opens a dialog box to choose a config.julgame file.
 """
+function choose_project_filepath()
+    return dirname(pick_file(; filterlist="julgame"))
+end
+
 function choose_folder_with_dialog()
     dir = pick_folder()
     # println("open_dialog returned $dir")
     return dir
 end
-
 
 """
     load_scene(scenePath::String, renderer)
@@ -79,9 +103,10 @@ Load a scene from the specified `scenePath` using the given `renderer`.
 The loaded main struct.
 """
 function load_scene(scenePath::String, renderer)
+    println("Loading scene from $scenePath")
     game = C_NULL
     try
-        game = SceneLoaderModule.load_scene_from_editor(scenePath, renderer, true);
+        game = SceneLoaderModule.load_scene_from_editor(scenePath, renderer);
     catch e
         rethrow(e)
     end

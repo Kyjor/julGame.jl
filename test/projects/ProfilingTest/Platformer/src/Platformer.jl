@@ -1,30 +1,26 @@
-module Platformer
+module PlatformerModule
     using JulGame
-    using JulGame.Math
-    using JulGame.SceneBuilderModule
-    
-    function run()
-        JulGame.MAIN.testMode = true
-        JulGame.MAIN.testLength = 30.0
-        JulGame.MAIN.currentTestTime = 0.0
+    function run_platformer()
+        JulGame.MAIN = JulGame.Main(Float64(1.0))
+        MAIN.testMode = true
+        MAIN.testLength = 30.0
+        MAIN.currentTestTime = 0.0
         JulGame.PIXELS_PER_UNIT = 16
-        scene = Scene("level_0.json")
+        scene = JulGame.SceneBuilderModule.Scene("level_0.json")
         try
-            scene.init("JulGame Example", false, Vector2(1280, 720),Vector2(1280, 720), true, 1.0, true, 144)
+            SceneBuilderModule.load_and_prepare_scene(;this=scene)
         catch e
             @error e
             Base.show_backtrace(stderr, catch_backtrace())
             return -1
         end
 
-        println("Running")
         return 0
     end
+end # module
 
-    julia_main() = run()
-end
 # comment when building
-#Platformer.run()
+# Platformer.run()
 # using Profile
 
 # @profile Platformer.run()
@@ -33,6 +29,6 @@ end
 
 #@profview_allocs Platformer.run() sample_rate = 1
 #using Cthulhu
-#@profview Platformer.run()
+#ProfileView.@profview Platformer.run()
 # Click somewhere in the profile
 #Cthulhu.descend_clicked()

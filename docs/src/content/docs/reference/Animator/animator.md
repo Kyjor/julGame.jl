@@ -16,7 +16,7 @@ sidebar:
 
 | Method | Description |
 |-----------------------------------------------------------------------|---------------|
-| [ForceFrameUpdate](/JulGame.jl/reference/animator/functions/ForceFrameUpdate/) | Updates the sprite crop of the animator to the specified frame index. |
+| [force_frame_update](/JulGame.jl/reference/animator/functions/force_frame_update/) | Updates the sprite crop of the animator to the specified frame index. |
 
 ### In the Editor
 ![Animator Component Editor](../../../../assets/reference/animator-component-editor.png)

@@ -1,4 +1,4 @@
-function show_debug_window(latestExceptions::Vector{String} = String[])
+function show_debug_window(latestExceptions)
     @cstatic begin
         CImGui.Begin("Debug")
         CImGui.Text("The latest 10 exceptions are:")
@@ -7,6 +7,7 @@ function show_debug_window(latestExceptions::Vector{String} = String[])
         for exception in latestExceptions
             CImGui.Text("[$(counter)] $(exception[2]): $(exception[1])")
             CImGui.Button("Copy to clipboard") && (CImGui.SetClipboardText("[$(counter)] $(exception[2]): $(exception[1])");)
+            CImGui.Button("Open in vscode") && (SDL2.SDL_OpenURL("vscode://file/$(exception[3])");)
             counter += 1
         end
         CImGui.End()

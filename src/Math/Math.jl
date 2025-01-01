@@ -22,4 +22,5 @@ module Math
     export Vector3
     export Vector3f
     export Vector4
+    export Vector4f
 end

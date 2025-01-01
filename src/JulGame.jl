@@ -1,20 +1,19 @@
 module JulGame
-    include("CommonFunctions.jl")
+    include("utils/CommonFunctions.jl")
     using SimpleDirectMediaLayer
     const SDL2 = SimpleDirectMediaLayer
-
-    function __init__()
-        SDL2.init()
-    end
+    MAIN = nothing
+    IS_EDITOR = false
+    DELTA_TIME = 0.0
 
     include("ModuleExtensions/SDL2Extension.jl")
     const SDL2E = SDL2Extension
-    export SDL2, SDL2E
+    export DELTA_TIME, IS_EDITOR, SDL2, SDL2E, MAIN
 
-    include("Utils.jl")
+    include("utils/Utils.jl")
     export CallSDLFunction
 
-    include("Constants.jl")
+    include("utils/Constants.jl")
     export SCALE_UNITS, GRAVITY
 
     PIXELS_PER_UNIT = -1
@@ -26,19 +25,19 @@ module JulGame
     Renderer = Ptr{SDL2.LibSDL2.SDL_Renderer}(C_NULL)
     export Renderer
     
-    include("Macros.jl")
-    using .Macros: @event
-    export @event
+    include("utils/Macros.jl")
+    using .Macros: @event, @argevent
+    export @event, @argevent
 
     include("Math/Math.jl")
     using .Math: Math
     export Math
 
-    include("Input/Input.jl")
+    include("engine/Input/Input.jl")
     using .InputModule: Input
     export Input
 
-    include("UI/UI.jl")
+    include("engine/UI/UI.jl")
     using .UI
     export ScreenButtonModule, TextBoxModule
     
@@ -46,25 +45,29 @@ module JulGame
     using .ParticleModule
     export ParticleModule
 
-    
     include("Particle/Dot.jl")
     using .DotModule
     export DotModule
 
-    include("Component/Component.jl")
+    include("engine/Component/Component.jl")
     using .Component
     export AnimationModule, AnimatorModule, ColliderModule, CircleColliderModule, RigidbodyModule, ShapeModule, SoundSourceModule, SpriteModule, TransformModule
     
-    include("Entity.jl") 
+    include("engine/Camera/Camera.jl")
+    using .CameraModule: Camera
+    
+    include("engine/Entity.jl") 
     using .EntityModule   
     export Entity
 
-    include("SceneManagement/SceneManagement.jl")
+    include("engine/Scene.jl")
+    using .SceneModule: Scene
+
+    include("engine/SceneManagement/SceneManagement.jl")
     using .SceneManagement
     export SceneBuilderModule, SceneLoaderModule, SceneReaderModule, SceneWriterModule 
     
     include("Main.jl") 
-    using .MainLoop: Main   
-    const MAIN = Main(Float64(1.0))
-    export MAIN
+    using .MainLoop: Main
+    export Main
 end

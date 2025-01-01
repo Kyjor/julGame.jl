@@ -228,9 +228,9 @@ declare module 'astro:content' {
   collection: "docs";
   data: InferEntrySchema<"docs">
 } & { render(): Render[".md"] };
-"reference/Animator/functions/ForceFrameUpdate.md": {
-	id: "reference/Animator/functions/ForceFrameUpdate.md";
-  slug: "reference/animator/functions/forceframeupdate";
+"reference/Animator/functions/force_frame_update.md": {
+	id: "reference/Animator/functions/force_frame_update.md";
+  slug: "reference/animator/functions/force_frame_update";
   body: string;
   collection: "docs";
   data: InferEntrySchema<"docs">
@@ -263,6 +263,20 @@ declare module 'astro:content' {
   collection: "docs";
   data: InferEntrySchema<"docs">
 } & { render(): Render[".md"] };
+"reference/Macros/argevent.md": {
+	id: "reference/Macros/argevent.md";
+  slug: "reference/macros/argevent";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"reference/Macros/event.md": {
+	id: "reference/Macros/event.md";
+  slug: "reference/macros/event";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
 "reference/Rigidbody/properties/acceleration.md": {
 	id: "reference/Rigidbody/properties/acceleration.md";
   slug: "reference/rigidbody/properties/acceleration";
@@ -284,9 +298,9 @@ declare module 'astro:content' {
   collection: "docs";
   data: InferEntrySchema<"docs">
 } & { render(): Render[".md"] };
-"reference/Shape/properties/size.md": {
-	id: "reference/Shape/properties/size.md";
-  slug: "reference/shape/properties/size";
+"reference/Shape/properties/dimensions.md": {
+	id: "reference/Shape/properties/dimensions.md";
+  slug: "reference/shape/properties/dimensions";
   body: string;
   collection: "docs";
   data: InferEntrySchema<"docs">
@@ -336,6 +350,13 @@ declare module 'astro:content' {
 "release-notes/v0.0.4.md": {
 	id: "release-notes/v0.0.4.md";
   slug: "release-notes/v004";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"release-notes/v0.1.0.md": {
+	id: "release-notes/v0.1.0.md";
+  slug: "release-notes/v010";
   body: string;
   collection: "docs";
   data: InferEntrySchema<"docs">

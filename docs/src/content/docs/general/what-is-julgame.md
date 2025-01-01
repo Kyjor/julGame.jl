@@ -14,7 +14,7 @@ description: An explanation of the engine, along with it's current features and 
 
 ## Support
 
-If you want to support development, feel free to check out my [discord server](https://discord.gg/RGMkdzW), or my [YouTube channel](https://www.youtube.com/@kyjor_) where I make videos about game development: 
+If you want to support development, feel free to check out my [discord server](https://discord.gg/RGMkdzW), or my [YouTube channel](https://www.youtube.com/@kyjor_) where I make videos about game development
 
 ## What is JulGame?
 
