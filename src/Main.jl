@@ -35,6 +35,7 @@ module MainLoop
 		window::Ptr{SDL2.SDL_Window}
 		windowName::String
 		zoom::Float64
+		dot
 
 		function Main(zoom::Float64 = 1.0)
 			this::Main = new()
@@ -623,6 +624,8 @@ function game_loop(this::Main, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhys
 			for uiElement in this.scene.uiElements
                 JulGame.render(uiElement, DEBUG)
 			end
+
+      this.dot.draw()
 
 			pos1::Math.Vector2 = windowPos !== nothing ? windowPos : Math.Vector2(0, 0)
 			this.mousePositionWorld = Math.Vector2(floor(Int32,(this.input.mousePosition.x + (cameraPosition.x * SCALE_UNITS * this.zoom)) / SCALE_UNITS / this.zoom), floor(Int32,( this.input.mousePosition.y + (cameraPosition.y * SCALE_UNITS * this.zoom)) / SCALE_UNITS / this.zoom))

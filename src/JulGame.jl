@@ -40,6 +40,14 @@ module JulGame
     include("engine/UI/UI.jl")
     using .UI
     export ScreenButtonModule, TextBoxModule
+    
+    include("Particle/Particle.jl") 
+    using .ParticleModule
+    export ParticleModule
+
+    include("Particle/Dot.jl")
+    using .DotModule
+    export DotModule
 
     include("engine/Component/Component.jl")
     using .Component
