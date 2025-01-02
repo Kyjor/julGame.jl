@@ -105,15 +105,13 @@ module TextBoxModule
             raw_data = JulGame.FONT_CACHE[get_comma_separated_path(fontPath)]
             rw = SDL2.SDL_RWFromConstMem(pointer(raw_data), length(raw_data))
             if rw != C_NULL
-                @info("loading font from cache")
+                @debug("loading font from cache")
                 @debug("comma separated path: ", get_comma_separated_path(fontPath))
                 return SDL2.TTF_OpenFontRW(rw, 1, fontSize)
             end
         end
 
-        font = CallSDLFunction(SDL2.TTF_OpenFont, joinpath(basePath, fontPath), fontSize)
-
-        return font
+        return CallSDLFunction(SDL2.TTF_OpenFont, joinpath(basePath, fontPath), fontSize)
     end
 
     function get_comma_separated_path(path::String)

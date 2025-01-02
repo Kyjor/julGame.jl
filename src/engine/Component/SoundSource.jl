@@ -31,7 +31,7 @@ module SoundSourceModule
             if length(path) < 1
                 sound = C_NULL    
             else
-                sound = isMusic ? SDL2.Mix_LoadMUS(fullPath) : SDL2.Mix_LoadWAV(fullPath)
+                sound = load_sound_sdl(path, isMusic)
             end
             error = unsafe_string(SDL2.SDL_GetError())
 
@@ -79,7 +79,7 @@ module SoundSourceModule
     function Component.load_sound(this::InternalSoundSource, soundPath::String, isMusic::Bool)
         this.isMusic = isMusic
         SDL2.SDL_ClearError()
-        this.sound =  this.isMusic ? SDL2.Mix_LoadMUS(joinpath(BasePath, "assets", "sounds", soundPath)) : SDL2.Mix_LoadWAV(joinpath(BasePath, "assets", "sounds", soundPath))
+        this.sound = load_sound_sdl(soundPath, isMusic)
         error = unsafe_string(SDL2.SDL_GetError())
         if !isempty(error)
             println(string("Couldn't open sound! SDL Error: ", error))
@@ -88,6 +88,34 @@ module SoundSourceModule
             return
         end
         this.path = soundPath
+    end
+
+    function load_sound_sdl(soundPath::String, isMusic::Bool)
+        if haskey(JulGame.AUDIO_CACHE, get_comma_separated_path(soundPath))
+            raw_data = JulGame.AUDIO_CACHE[get_comma_separated_path(soundPath)]
+            rw = SDL2.SDL_RWFromConstMem(pointer(raw_data), length(raw_data))
+            if rw != C_NULL
+                @debug("loading sound from cache")
+                @debug("comma separated path: ", get_comma_separated_path(soundPath))
+                return isMusic ? SDL2.Mix_LoadMUS_RW(rw, 1) : SDL2.Mix_LoadWAV_RW(rw, 1)
+            end
+        end
+        @debug("loading sound from fs")
+
+        fullPath = joinpath(BasePath, "assets", "sounds", soundPath)
+        return isMusic ? SDL2.Mix_LoadMUS(fullPath) : SDL2.Mix_LoadWAV(fullPath)
+    end
+
+    function get_comma_separated_path(path::String)
+        # Normalize the path to use forward slashes
+        normalized_path = replace(path, '\\' => '/')
+        
+        # Split the path into components
+        parts = split(normalized_path, '/')
+        
+        result = join(parts[1:end], ",")
+    
+        return result  
     end
 
     function Component.unload_sound(this::InternalSoundSource)

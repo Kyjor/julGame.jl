@@ -213,9 +213,8 @@ module SpriteModule
                 return SDL2.IMG_Load_RW(rw, 1)
             end
         end
-        image = SDL2.IMG_Load(fullPath)
 
-        return image
+        return SDL2.IMG_Load(fullPath)
     end
 
     function get_comma_separated_path(path::String)
