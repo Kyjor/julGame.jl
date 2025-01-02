@@ -77,7 +77,7 @@ module TextBoxModule
 
     function UI.load_font(this::TextBox, basePath::String, fontPath::String)
         @debug string("loading font from $(basePath)\\$(fontPath)")
-        this.font = CallSDLFunction(SDL2.TTF_OpenFont, joinpath(basePath, fontPath), this.fontSize)
+        this.font = load_font_sdl(basePath, fontPath, this.fontSize)
         if this.font == C_NULL
             error("Failed to load font")
             return
@@ -98,6 +98,34 @@ module TextBoxModule
         if !this.isWorldEntity
             UI.center_text(this)
         end
+    end
+
+    function load_font_sdl(basePath::String, fontPath::String, fontSize::Int32)
+        if haskey(JulGame.FONT_CACHE, get_comma_separated_path(fontPath))
+            raw_data = JulGame.FONT_CACHE[get_comma_separated_path(fontPath)]
+            rw = SDL2.SDL_RWFromConstMem(pointer(raw_data), length(raw_data))
+            if rw != C_NULL
+                @info("loading font from cache")
+                @debug("comma separated path: ", get_comma_separated_path(fontPath))
+                return SDL2.TTF_OpenFontRW(rw, 1, fontSize)
+            end
+        end
+
+        font = CallSDLFunction(SDL2.TTF_OpenFont, joinpath(basePath, fontPath), fontSize)
+
+        return font
+    end
+
+    function get_comma_separated_path(path::String)
+        # Normalize the path to use forward slashes
+        normalized_path = replace(path, '\\' => '/')
+        
+        # Split the path into components
+        parts = split(normalized_path, '/')
+        
+        result = join(parts[1:end], ",")
+    
+        return result  
     end
 
     """
