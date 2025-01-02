@@ -110,7 +110,7 @@ module TextBoxModule
                 return SDL2.TTF_OpenFontRW(rw, 1, fontSize)
             end
         end
-
+        @debug "Loading font from disk, there are $(length(JulGame.FONT_CACHE)) fonts in cache"
         return CallSDLFunction(SDL2.TTF_OpenFont, joinpath(basePath, fontPath), fontSize)
     end
 

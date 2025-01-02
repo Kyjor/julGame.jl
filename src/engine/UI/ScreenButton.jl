@@ -32,8 +32,8 @@ module ScreenButtonModule
             
             this.buttonDownSpritePath = buttonDownSpritePath
             this.buttonUpSpritePath = buttonUpSpritePath
-            this.buttonDownSprite = CallSDLFunction(SDL2.IMG_Load, joinpath(JulGame.BasePath, "assets", "images", buttonDownSpritePath))
-            this.buttonUpSprite = CallSDLFunction(SDL2.IMG_Load, joinpath(JulGame.BasePath, "assets", "images", buttonUpSpritePath))
+            this.buttonDownSprite = load_image_sdl(joinpath(JulGame.BasePath, "assets", "images"), buttonDownSpritePath)
+            this.buttonUpSprite = load_image_sdl(joinpath(JulGame.BasePath, "assets", "images"), buttonUpSpritePath)
             this.clickEvents = []
             this.currentTexture = C_NULL
             this.size = size
@@ -95,7 +95,7 @@ module ScreenButtonModule
     end
 
     function UI.load_button_sprite_editor(this::ScreenButton, path::String, up::Bool)
-        sprite = CallSDLFunction(SDL2.IMG_Load, joinpath(JulGame.BasePath, "assets", "images", path))
+        sprite = load_image_sdl(joinpath(JulGame.BasePath, "assets", "images", path), path)
         texture = CallSDLFunction(SDL2.SDL_CreateTextureFromSurface, JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, sprite)
         if up
             this.buttonUpSpritePath = path
@@ -108,6 +108,33 @@ module ScreenButtonModule
         end
 
         this.currentTexture = texture
+    end
+
+    function load_image_sdl(fullPath::String, imagePath::String)
+        if haskey(JulGame.IMAGE_CACHE, get_comma_separated_path(imagePath))
+            raw_data = JulGame.IMAGE_CACHE[get_comma_separated_path(imagePath)]
+            rw = SDL2.SDL_RWFromConstMem(pointer(raw_data), length(raw_data))
+            if rw != C_NULL
+                @debug("loading image at $(imagePath) from cache")
+                @debug("comma separated path: ", get_comma_separated_path(imagePath))
+                return SDL2.IMG_Load_RW(rw, 1)
+            end
+        end
+        @debug "Loading image from disk, there are $(length(JulGame.IMAGE_CACHE)) images in cache"
+
+        return CallSDLFunction(SDL2.IMG_Load, joinpath(fullPath))
+    end
+
+    function get_comma_separated_path(path::String)
+        # Normalize the path to use forward slashes
+        normalized_path = replace(path, '\\' => '/')
+        
+        # Split the path into components
+        parts = split(normalized_path, '/')
+        
+        result = join(parts[1:end], ",")
+    
+        return result  
     end
 
     function UI.add_click_event(this::ScreenButton, event)

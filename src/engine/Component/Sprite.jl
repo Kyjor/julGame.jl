@@ -213,6 +213,7 @@ module SpriteModule
                 return SDL2.IMG_Load_RW(rw, 1)
             end
         end
+        @debug "Loading image from disk for sprite, there are $(length(JulGame.IMAGES_CACHE)) images in cache"
 
         return SDL2.IMG_Load(fullPath)
     end

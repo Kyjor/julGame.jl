@@ -100,7 +100,7 @@ module SoundSourceModule
                 return isMusic ? SDL2.Mix_LoadMUS_RW(rw, 1) : SDL2.Mix_LoadWAV_RW(rw, 1)
             end
         end
-        @debug("loading sound from fs")
+        @debug "Loading sound from disk, there are $(length(JulGame.AUDIO_CACHE)) sounds in cache"
 
         fullPath = joinpath(BasePath, "assets", "sounds", soundPath)
         return isMusic ? SDL2.Mix_LoadMUS(fullPath) : SDL2.Mix_LoadWAV(fullPath)
