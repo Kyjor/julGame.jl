@@ -61,7 +61,7 @@ module SpriteModule
         
             fullPath = joinpath(BasePath, "assets", "images", imagePath)
             
-            this.image = SDL2.IMG_Load(fullPath)
+            this.image = load_image_sdl(this, fullPath, imagePath)
             if this.image == C_NULL
                 error = unsafe_string(SDL2.SDL_GetError())
                 
@@ -186,7 +186,7 @@ module SpriteModule
 
     function Component.load_image(this::InternalSprite, imagePath::String)
         SDL2.SDL_ClearError()
-        this.image = SDL2.IMG_Load(joinpath(BasePath, "assets", "images", imagePath))
+        this.image = load_image_sdl(this, joinpath(BasePath, "assets", "images", imagePath), imagePath)
         error = unsafe_string(SDL2.SDL_GetError())
         if !isempty(error)
             println(string("Couldn't open image! SDL Error: ", error))
@@ -201,6 +201,33 @@ module SpriteModule
         this.imagePath = imagePath
         this.texture = SDL2.SDL_CreateTextureFromSurface(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, this.image)
         Component.set_color(this)
+    end
+
+    function load_image_sdl(this::InternalSprite, fullPath::String, imagePath::String)
+        if haskey(JulGame.IMAGE_CACHE, get_comma_separated_path(imagePath))
+            raw_data = JulGame.IMAGE_CACHE[get_comma_separated_path(imagePath)]
+            rw = SDL2.SDL_RWFromConstMem(pointer(raw_data), length(raw_data))
+            if rw != C_NULL
+                @debug("loading image from cache")
+                @debug("comma separated path: ", get_comma_separated_path(imagePath))
+                return SDL2.IMG_Load_RW(rw, 1)
+            end
+        end
+        image = SDL2.IMG_Load(fullPath)
+
+        return image
+    end
+
+    function get_comma_separated_path(path::String)
+        # Normalize the path to use forward slashes
+        normalized_path = replace(path, '\\' => '/')
+        
+        # Split the path into components
+        parts = split(normalized_path, '/')
+        
+        result = join(parts[1:end], ",")
+    
+        return result  
     end
 
     function Component.destroy(this::InternalSprite)
