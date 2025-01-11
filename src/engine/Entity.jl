@@ -162,7 +162,7 @@ module EntityModule
         return this.sprite
     end
 
-    function JulGame.add_shape(this::Entity, shape::Shape = Shape(Math.Vector3(255,0,0), true, true, 0, Math.Vector2f(0,0), Math.Vector2f(0,0), Math.Vector2f(1,1)))
+    function JulGame.add_shape(this::Entity, shape::Shape = Shape(Math.Vector3(255,0,0), true, true, 0, Math.Vector2f(0,0), Math.Vector2f(0,0), Math.Vector2f(1,1), Int32(255)))
         if this.shape != C_NULL
             println("Shape already exists on entity named ", this.name)
             return

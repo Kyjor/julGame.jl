@@ -163,6 +163,7 @@ module SceneWriterModule
                     "offset" => Dict("x" => component.offset.x, "y" => component.offset.y),
                     "position" => Dict("x" => component.position.x, "y" => component.position.y),
                     "size" => Dict("x" => component.size.x, "y" => component.size.y),
+                    "alpha" => component.alpha,
                     )
                 push!(componentsDict, serializedComponent)
             elseif componentType == "SoundSource"

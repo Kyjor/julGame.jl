@@ -185,7 +185,8 @@ module SceneReaderModule
                 isWorldEntity = !haskey(component, "isWorldEntity") ? true : component.isWorldEntity
                 offset = !haskey(component, "offset") ? Vector2f() : Vector2f(component.offset.x, component.offset.y)
                 position = !haskey(component, "position") ? Vector2f() : Vector2f(component.position.x, component.position.y)
-                newComponent = Shape(color::Vector3, isFilled::Bool, isWorldEntity::Bool, layer::Int32, offset::Vector2f, position::Vector2f, size::Vector2f)
+                alpha = !haskey(component, "alpha") ? Int32(255) : Int32(component.alpha)
+                newComponent = Shape(color::Vector3, isFilled::Bool, isWorldEntity::Bool, layer::Int32, offset::Vector2f, position::Vector2f, size::Vector2f, alpha::Int32)
             end
             
             return newComponent

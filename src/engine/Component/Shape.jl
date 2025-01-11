@@ -10,6 +10,7 @@ module ShapeModule
         offset::Math.Vector2f
         position::Math.Vector2f
         size::Math.Vector2f
+        alpha::Int32 # 0-255
     end
 
     export InternalShape
@@ -22,8 +23,9 @@ module ShapeModule
         position::Math.Vector2f
         parent::Any # Entity
         size::Math.Vector2f
+        alpha::Int32 # 0-255
         
-        function InternalShape(parent::Any, color::Math.Vector3 = Math.Vector3(255,0,0), isFilled::Bool = true, offset::Math.Vector2f = Math.Vector2f(0,0), size::Math.Vector2f = Math.Vector2f(1,1); isWorldEntity::Bool = true, position::Math.Vector2f = Math.Vector2f(0,0), layer::Int32 = Int32(0))
+        function InternalShape(parent::Any, color::Math.Vector3 = Math.Vector3(255,0,0), isFilled::Bool = true, offset::Math.Vector2f = Math.Vector2f(0,0), size::Math.Vector2f = Math.Vector2f(1,1); isWorldEntity::Bool = true, position::Math.Vector2f = Math.Vector2f(0,0), layer::Int32 = Int32(0), alpha::Int32 = Int32(255))
             this = new()
             
             this.color = color
@@ -34,6 +36,7 @@ module ShapeModule
             this.offset = offset
             this.parent = parent
             this.position = position
+            this.alpha = alpha
 
             return this
         end
@@ -58,9 +61,10 @@ module ShapeModule
         convert(Int32,round(parentTransform.scale.x * SCALE_UNITS)), 
         convert(Int32,round(parentTransform.scale.y * SCALE_UNITS))))
 
-        rgba = (r = Ref(UInt8(this.color.x)), g = Ref(UInt8(this.color.y)), b = Ref(UInt8(this.color.z)), a = Ref(UInt8(255)))
-        currentDrawColor = SDL2.SDL_GetRenderDrawColor(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, rgba.r, rgba.g, rgba.b, rgba.a)
-        SDL2.SDL_SetRenderDrawColor(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, this.color.x, this.color.y, this.color.z, SDL2.SDL_ALPHA_OPAQUE );      
+        rgba = (r = Ref(UInt8(0)), g = Ref(UInt8(0)), b = Ref(UInt8(0)), a = Ref(UInt8(0)))
+        SDL2.SDL_GetRenderDrawColor(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, rgba.r, rgba.g, rgba.b, rgba.a)
+
+        SDL2.SDL_SetRenderDrawColor(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, this.color.x, this.color.y, this.color.z, this.alpha);      
         this.isFilled ? SDL2.SDL_RenderFillRectF(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, outlineRect) : SDL2.SDL_RenderDrawRectF(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, outlineRect);
         SDL2.SDL_SetRenderDrawColor(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, rgba.r[], rgba.g[], rgba.b[], rgba.a[]);
     end
