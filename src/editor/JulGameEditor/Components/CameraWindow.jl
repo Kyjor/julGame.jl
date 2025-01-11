@@ -75,19 +75,6 @@ function show_camera_window(this::CameraWindow)
             
             CImGui.Text("Starting Coordinates: $(this.camera.startingCoordinates.x), $(this.camera.startingCoordinates.y)")
             
-            # Temporary Float32 storage
-            start_x32 = Float32(this.camera.startingCoordinates.x)
-            start_y32 = Float32(this.camera.startingCoordinates.y)
-            isEdited = @c CImGui.InputFloat("Starting Coordinates X", &start_x32, 1)
-            if isEdited
-                this.camera.startingCoordinates = Vector2f(Float64(start_x32), this.camera.startingCoordinates.y)
-            end
-            CImGui.SameLine()
-            isEdited = @c CImGui.InputFloat("Starting Coordinates Y", &start_y32, 1)
-            if isEdited
-                this.camera.startingCoordinates = Vector2f(this.camera.startingCoordinates.x, Float64(start_y32))
-            end
-
             # camera background color
             # CImGui.Text("Background Color:")
             # color_r = UInt8(this.camera.backgroundColor[1])

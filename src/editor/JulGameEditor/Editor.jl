@@ -697,9 +697,13 @@ module Editor
         config = Dict{String, String}()
         if isfile(filename)
             open(filename, "r") do file
-                for line in eachline(file)
-                    key, value = split(line, "=")
-                    config[key] = value
+                try
+                    for line in eachline(file)
+                        key, value = split(line, "=")
+                        config[key] = value
+                    end
+                catch e
+                    @warn e
                 end
             end
         end

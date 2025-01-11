@@ -122,7 +122,7 @@ module ScreenButtonModule
         end
         @debug "Loading image from disk, there are $(length(JulGame.IMAGE_CACHE)) images in cache"
 
-        return CallSDLFunction(SDL2.IMG_Load, joinpath(fullPath))
+        return CallSDLFunction(SDL2.IMG_Load, joinpath(fullPath, imagePath))
     end
 
     function get_comma_separated_path(path::String)
