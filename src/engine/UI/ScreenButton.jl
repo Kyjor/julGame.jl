@@ -16,6 +16,7 @@ module ScreenButtonModule
         buttonUpSpritePath::String
         buttonUpTexture
         fontPath::Union{String, Ptr{Nothing}}
+        isHovered::Bool
         isInitialized::Bool
         mouseOverSprite
         name::String
@@ -46,6 +47,7 @@ module ScreenButtonModule
             this.textTexture = C_NULL
             this.isInitialized = false
             this.persistentBetweenScenes = false
+            this.isHovered = false
 
             return this
         end

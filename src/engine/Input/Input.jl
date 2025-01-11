@@ -30,6 +30,9 @@ module InputModule
         numHats
         button
 
+        # Cursor bank 
+        cursorBank::Dict{String, Ptr{SDL2.SDL_SystemCursor}} # Key is the name of the cursor, value is the SDL2 cursor
+
         function Input()
             this = new()
 
@@ -83,6 +86,9 @@ module InputModule
             this.yDir = 0
             this.button = 0
 
+            this.cursorBank = Dict{String, SDL2.SDL_SystemCursor}() 
+            create_cursor_bank(this)
+
             return this
         end
     end
@@ -109,6 +115,7 @@ module InputModule
                         continue
                     end
 
+                    insideAnyButton = false
                     for screenButton in MAIN.scene.uiElements
                         if split("$(typeof(screenButton))", ".")[end] != "ScreenButton"
                             continue
@@ -129,8 +136,15 @@ module InputModule
                         if !eventWasInsideThisButton
                             continue
                         end
+                        insideAnyButton = true
+
+                        SDL2.SDL_SetCursor(this.cursorBank["hand"])
                         
                         JulGame.UI.handle_event(screenButton, evt, x[1], y[1])
+                    end
+
+                    if !insideAnyButton
+                        SDL2.SDL_SetCursor(this.cursorBank["arrow"])
                     end
                 end
 
@@ -363,5 +377,19 @@ module InputModule
         end
         return false
     end
-    
+
+    function create_cursor_bank(this::Input)
+        this.cursorBank["arrow"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_ARROW)
+        this.cursorBank["ibeam"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_IBEAM)
+        this.cursorBank["wait"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_WAIT)
+        this.cursorBank["crosshair"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_CROSSHAIR)
+        this.cursorBank["waitarrow"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_WAITARROW)
+        this.cursorBank["sizeall"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_SIZEALL)
+        this.cursorBank["sizenesw"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_SIZENESW)
+        this.cursorBank["sizenwse"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_SIZENWSE)
+        this.cursorBank["sizewe"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_SIZEWE)
+        this.cursorBank["sizens"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_SIZENS)
+        this.cursorBank["no"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_NO)
+        this.cursorBank["hand"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_HAND)
+    end
 end
