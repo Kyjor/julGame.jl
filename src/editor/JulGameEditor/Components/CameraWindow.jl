@@ -73,8 +73,6 @@ function show_camera_window(this::CameraWindow)
                 this.camera.size = Vector2(this.camera.size.x, Float64(size_y32))
             end
             
-            CImGui.Text("Starting Coordinates: $(this.camera.startingCoordinates.x), $(this.camera.startingCoordinates.y)")
-            
             # camera background color
             # CImGui.Text("Background Color:")
             # color_r = UInt8(this.camera.backgroundColor[1])
