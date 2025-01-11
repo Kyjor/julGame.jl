@@ -134,6 +134,7 @@ module InputModule
 
                         screenButton.mouseOverSprite = eventWasInsideThisButton
                         if !eventWasInsideThisButton
+                            screenButton.isHovered = false
                             continue
                         end
                         insideAnyButton = true

@@ -66,6 +66,7 @@ module ScreenButtonModule
             this.currentTexture === nothing #|| this.textTexture === nothing
             return
         end
+
         @assert SDL2.SDL_RenderCopyExF(
             JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, 
             this.currentTexture, 
@@ -152,7 +153,7 @@ module ScreenButtonModule
                 Base.invokelatest(eventToCall,(evt = evt, x = x, y = y))
             end
         elseif evt.type == SDL2.SDL_MOUSEMOTION
-            #println("mouse move")
+            this.isHovered = true
         end 
     end
     
