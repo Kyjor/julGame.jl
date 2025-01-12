@@ -16,6 +16,7 @@ module ScreenButtonModule
         buttonUpSpritePath::String
         buttonUpTexture
         fontPath::Union{String, Ptr{Nothing}}
+        isActive::Bool
         isHovered::Bool
         isInitialized::Bool
         mouseOverSprite
@@ -48,6 +49,7 @@ module ScreenButtonModule
             this.isInitialized = false
             this.persistentBetweenScenes = false
             this.isHovered = false
+            this.isActive = true
 
             return this
         end
@@ -56,6 +58,10 @@ module ScreenButtonModule
     function UI.render(this::ScreenButton, debug)
         if !this.isInitialized
             UI.initialize(this)
+        end
+
+        if !this.isActive
+            return
         end
 
         if !this.mouseOverSprite && this.currentTexture == this.buttonDownTexture

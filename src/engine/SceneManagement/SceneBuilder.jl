@@ -246,22 +246,18 @@ module SceneBuilderModule
                     constructor = Base.invokelatest(getfield, module_name, Symbol(script.name)) 
                     newScript = Base.invokelatest(constructor)
                     scriptFields = get(script, "fields", Dict())
-
+                    @debug("getting fields for: $(script)")
                     for (key, value) in scriptFields
                         ftype = nothing
                         try
                             ftype = fieldtype(typeof(newScript), Symbol(key))
-                            if ftype == Float64
-                                value = Float64(value)
-                            elseif ftype == Int32
-                                value = Int32(value)
-                            elseif ftype == Int64
-                                value = Int64(value)
-                            elseif ftype == EditorExport
+                            @debug("type: $(ftype)")
+                            if ftype <: EditorExport
+                                @debug "Overwriting $(key) to $(value) using scene file"
                                 Base.invokelatest(setfield!, newScript, key, EditorExport(value))
-                                @info "Overwriting $(key) to $(value) using scene file"
                                 continue
                             elseif value === nothing
+                                @debug "Value is nothing"
                                 continue
                             end
                         catch e
