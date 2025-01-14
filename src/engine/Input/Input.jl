@@ -116,32 +116,30 @@ module InputModule
                     end
 
                     insideAnyButton = false
-                    for screenButton in MAIN.scene.uiElements
-                        if split("$(typeof(screenButton))", ".")[end] != "ScreenButton"
-                            continue
-                        end
+                    for uiElement in MAIN.scene.uiElements
                         # Check position of button to see which we are interacting with
                         eventWasInsideThisButton = true
-                        if x[1] < screenButton.position.x + MAIN.scene.camera.startingCoordinates.x
+                        if x[1] < uiElement.position.x + MAIN.scene.camera.startingCoordinates.x
                             eventWasInsideThisButton = false
-                        elseif x[1] > MAIN.scene.camera.startingCoordinates.x + screenButton.position.x + screenButton.size.x * MAIN.zoom
+                        elseif x[1] > MAIN.scene.camera.startingCoordinates.x + uiElement.position.x + uiElement.size.x * MAIN.zoom
                             eventWasInsideThisButton = false
-                        elseif y[1] < screenButton.position.y + MAIN.scene.camera.startingCoordinates.y
+                        elseif y[1] < uiElement.position.y + MAIN.scene.camera.startingCoordinates.y
                             eventWasInsideThisButton = false
-                        elseif y[1] > MAIN.scene.camera.startingCoordinates.y + screenButton.position.y + screenButton.size.y * MAIN.zoom
+                        elseif y[1] > MAIN.scene.camera.startingCoordinates.y + uiElement.position.y + uiElement.size.y * MAIN.zoom
                             eventWasInsideThisButton = false
                         end
 
-                        screenButton.mouseOverSprite = eventWasInsideThisButton
                         if !eventWasInsideThisButton
-                            screenButton.isHovered = false
+                            uiElement.isHovered = false
                             continue
                         end
                         insideAnyButton = true
 
-                        SDL2.SDL_SetCursor(this.cursorBank["hand"])
+                        if split("$(typeof(uiElement))", ".")[end] == "ScreenButton"
+                            SDL2.SDL_SetCursor(this.cursorBank["crosshair"])
+                        end
                         
-                        JulGame.UI.handle_event(screenButton, evt, x[1], y[1])
+                        JulGame.UI.handle_event(uiElement, evt, x[1], y[1])
                     end
 
                     if !insideAnyButton

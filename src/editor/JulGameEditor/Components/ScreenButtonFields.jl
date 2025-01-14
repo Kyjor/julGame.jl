@@ -1,6 +1,6 @@
 function show_screenbutton_fields(selectedScreenButton, screenButtonField)
     fieldName = getFieldName1(screenButtonField)
-    unusedFields = ["alpha","clickEvents", "currentTexture", "buttonDownSprite", "buttonDownSpritePath", "buttonDownTexture", "buttonUpSprite", "buttonUpSpritePath", "buttonUpTexture", "fontPath", "isInitialized", "mouseOverSprite", "textTexture"]
+    unusedFields = ["alpha","clickEvents", "currentTexture", "buttonDownSprite", "buttonDownSpritePath", "buttonDownTexture", "buttonUpSprite", "buttonUpSpritePath", "buttonUpTexture", "fontPath", "isInitialized", "textTexture"]
     push!(unusedFields, "text")
     if fieldName in unusedFields
         return

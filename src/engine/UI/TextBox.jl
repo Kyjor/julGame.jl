@@ -5,6 +5,7 @@ module TextBoxModule
     export TextBox      
     mutable struct TextBox
         alpha
+        clickEvents
         font
         fontPath::String
         fontSize::Int32
@@ -12,6 +13,7 @@ module TextBoxModule
         isActive::Bool
         isCenteredX::Bool
         isCenteredY::Bool
+        isHovered::Bool
         isWorldEntity::Bool
         name::String
         persistentBetweenScenes::Bool
@@ -27,6 +29,7 @@ module TextBoxModule
 
             this.isConstructed = false
             this.alpha = 255
+            this.clickEvents = []
             this.fontPath = fontPath
             this.fontSize = Int32(fontSize)
             this.id = Int32(0)
@@ -35,12 +38,12 @@ module TextBoxModule
             this.name = name
             this.position = position
             setfield!(this, :text, text)
+            this.isHovered = false
             this.isWorldEntity = isWorldEntity
             this.textTexture = C_NULL
             this.persistentBetweenScenes = false
             this.isActive = true
             this.renderText = C_NULL
-
             
             if fontPath == ""
                 fontPath = joinpath("FiraCode-Regular.ttf")
@@ -98,6 +101,21 @@ module TextBoxModule
         if !this.isWorldEntity
             UI.center_text(this)
         end
+    end
+
+    function UI.add_click_event(this::TextBox, event)
+        push!(this.clickEvents, event)
+    end
+
+    function UI.handle_event(this::TextBox, evt, x, y)
+        if evt.type == evt.type == SDL2.SDL_MOUSEBUTTONDOWN
+        elseif evt.type == SDL2.SDL_MOUSEBUTTONUP
+            for eventToCall in this.clickEvents
+                Base.invokelatest(eventToCall,(evt = evt, x = x, y = y))
+            end
+        elseif evt.type == SDL2.SDL_MOUSEMOTION
+            this.isHovered = true
+        end 
     end
 
     function load_font_sdl(basePath::String, fontPath::String, fontSize::Int32)

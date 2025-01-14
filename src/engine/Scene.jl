@@ -8,6 +8,7 @@
         entities::Vector{Any}
         rigidbodies::Vector{Any}
         uiElements::Vector{Any}
+        name::String
 
         function Scene()
             this = new()

@@ -115,6 +115,7 @@ module SceneBuilderModule
         MAIN.globals = globals
         MAIN.level = this
         MAIN.targetFrameRate = targetFrameRate
+        MAIN.scene.name = split(this.scene, ".")[1]
 
         if size == Math.Vector2()
 			displayMode = SDL2.SDL_DisplayMode[SDL2.SDL_DisplayMode(0x12345678, 800, 600, 60, C_NULL)]

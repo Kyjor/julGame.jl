@@ -373,6 +373,7 @@ function JulGame.change_scene(sceneFileName::String)
 	#load new scene 
 	camera = this.scene.camera
 	this.scene = SceneModule.Scene()
+	this.scene.name = split(sceneFileName, ".")[1]
 	this.scene.entities = persistentEntities
 	this.scene.uiElements = persistentUIElements
 	this.scene.camera = camera

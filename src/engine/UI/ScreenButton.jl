@@ -19,7 +19,6 @@ module ScreenButtonModule
         isActive::Bool
         isHovered::Bool
         isInitialized::Bool
-        mouseOverSprite
         name::String
         persistentBetweenScenes::Bool
         position::Math.Vector2
@@ -40,7 +39,6 @@ module ScreenButtonModule
             this.currentTexture = C_NULL
             this.size = size
             this.fontPath = fontPath
-            this.mouseOverSprite = false
             this.name = name
             this.position = position
             this.text = text
@@ -64,9 +62,6 @@ module ScreenButtonModule
             return
         end
 
-        if !this.mouseOverSprite && this.currentTexture == this.buttonDownTexture
-            #TODO: this.currentTexture = this.buttonUpTexture
-        end    
         if this.currentTexture == C_NULL || 
             #this.textTexture == C_NULL || 
             this.currentTexture === nothing #|| this.textTexture === nothing
