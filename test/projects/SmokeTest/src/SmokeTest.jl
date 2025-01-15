@@ -1,7 +1,7 @@
 module SmokeTest
     using JulGame
     function run(SMOKETESTDIR, Test)
-        JulGame.MAIN = JulGame.Main(Float64(1.0))
+        JulGame.MAIN = JulGame.MainLoop(Float64(1.0))
         MAIN.testMode = true
         MAIN.testLength = 10.0
         MAIN.currentTestTime = 0.0

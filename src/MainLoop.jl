@@ -1,4 +1,4 @@
-module MainLoop
+module MainLoopModule
 	using ..JulGame
 	using ..JulGame: Camera, Component, Input, Math, UI, SceneModule
     import ..JulGame: Component
@@ -8,8 +8,8 @@ module MainLoop
 	include("utils/Enums.jl")
 	include("utils/Constants.jl")
 
-	export Main
-	mutable struct Main
+	export MainLoop
+	mutable struct MainLoop
 		assets::String
 		autoScaleZoom::Bool
 		close::Bool
@@ -36,8 +36,8 @@ module MainLoop
 		windowName::String
 		zoom::Float64
 
-		function Main(zoom::Float64 = 1.0)
-			this::Main = new()
+		function MainLoop(zoom::Float64 = 1.0)
+			this::MainLoop = new()
 
 			SDL2.init()
 
@@ -82,7 +82,7 @@ module MainLoop
         end
     end
 
-    function initialize_new_scene(this::Main)
+    function initialize_new_scene(this::MainLoop)
 		@debug "Initializing new scene"
 		@debug "Deserializing and building scene"
         SceneBuilderModule.deserialize_and_build_scene(this.level)
@@ -96,7 +96,7 @@ module MainLoop
         end
     end
 
-    function reset_camera_position(this::Main)
+    function reset_camera_position(this::MainLoop)
 		@debug "Resetting camera position"
 		if this.scene.camera === nothing return end
 
@@ -104,7 +104,7 @@ module MainLoop
         JulGame.CameraModule.update(this.scene.camera, cameraPosition)
     end
 	
-    function full_loop(this::Main)
+    function full_loop(this::MainLoop)
         try
 			this.close = false
             startTime = Ref(UInt64(0))
@@ -162,22 +162,22 @@ module MainLoop
         end
     end
 
-    function create_new_entity(this::Main)
+    function create_new_entity(this::MainLoop)
 		@debug "Creating new entity"
         SceneBuilderModule.create_new_entity(this.level)
     end
 
-    function create_new_text_box(this::Main)
+    function create_new_text_box(this::MainLoop)
 		@debug "Creating new text box"
         SceneBuilderModule.create_new_text_box(this.level)
     end
 
-	function create_new_screen_button(this::Main)
+	function create_new_screen_button(this::MainLoop)
 		@debug "Creating new screen button"
 		SceneBuilderModule.create_new_screen_button(this.level)
 	end
 
-    function update_viewport(this::Main, x,y)
+    function update_viewport(this::MainLoop, x,y)
 		@debug "Updating viewport"
         if !this.autoScaleZoom
             return
@@ -195,7 +195,7 @@ module MainLoop
         SDL2.SDL_RenderSetScale(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, this.zoom, this.zoom)
     end
 
-    function scale_zoom(this::Main, x,y)
+    function scale_zoom(this::MainLoop, x,y)
 		@debug "Scaling zoom"
 		if this.scene.camera === nothing
 			return
@@ -226,7 +226,7 @@ module MainLoop
     end
     
 	function prepare_window(size = C_NULL, isResizable::Bool = false, autoScaleZoom::Bool = true)
-		this::Main = MAIN
+		this::MainLoop = MAIN
 		this.autoScaleZoom = autoScaleZoom
 		scale_zoom(this, size.x, size.y)
 
@@ -243,7 +243,7 @@ module MainLoop
 	end
 
 function initialize_scripts_and_components()
-	this::Main = MAIN
+	this::MainLoop = MAIN
 	scripts = []
 	for entity in this.scene.entities
 		for script in entity.scripts
@@ -308,7 +308,7 @@ Change the scene to the specified `sceneFileName`. This function destroys the cu
 - `sceneFileName::String`: The name of the scene file to load.
 """
 function JulGame.change_scene(sceneFileName::String)
-	this::Main = MAIN
+	this::MainLoop = MAIN
 	@debug "Changing scene to: $(sceneFileName)"
 	this.close = true
 	this.shouldChangeScene = true
@@ -419,7 +419,7 @@ Destroy the specified entity. This removes the entity's sprite from the sprite l
 # Arguments
 - `entity`: The entity to be destroyed.
 """
-function JulGame.destroy_entity(this::Main, entity)
+function JulGame.destroy_entity(this::MainLoop, entity)
 	for i = eachindex(this.scene.entities)
 		if this.scene.entities[i] == entity
 			destroy_entity_components(this, entity)
@@ -430,7 +430,7 @@ function JulGame.destroy_entity(this::Main, entity)
 	end
 end
 
-function JulGame.destroy_ui_element(this::Main, uiElement)
+function JulGame.destroy_ui_element(this::MainLoop, uiElement)
 	for i = eachindex(this.scene.uiElements)
 		if this.scene.uiElements[i] == uiElement
 			deleteat!(this.scene.uiElements, i)
@@ -440,7 +440,7 @@ function JulGame.destroy_ui_element(this::Main, uiElement)
 	end
 end
 
-function destroy_entity_components(this::Main, entity)
+function destroy_entity_components(this::MainLoop, entity)
 	entitySprite = entity.sprite
 	if entitySprite != C_NULL
 		for j = eachindex(this.spriteLayers["$(entitySprite.layer)"])
@@ -489,7 +489,7 @@ Create a new entity. Adds the entity to the main game's entities array and adds 
 
 """
 function JulGame.create_entity(entity)
-	this::Main = MAIN
+	this::MainLoop = MAIN
 	push!(this.scene.entities, entity)
 	if entity.sprite != C_NULL
 		if !haskey(this.spriteLayers, "$(entity.sprite.layer)")
@@ -513,7 +513,7 @@ function JulGame.create_entity(entity)
 end
 
 """
-game_loop(this::Main, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhysicsTime::Ref{UInt64} = Ref(UInt64(0)), close::Ref{Bool} = Ref(Bool(false)), Vector{Any}} = C_NULL)
+game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhysicsTime::Ref{UInt64} = Ref(UInt64(0)), close::Ref{Bool} = Ref(Bool(false)), Vector{Any}} = C_NULL)
 
 Runs the game loop.
 
@@ -522,7 +522,7 @@ Parameters:
 - `startTime`: A reference to the start time of the game loop.
 - `lastPhysicsTime`: A reference to the last physics time of the game loop.
 """
-function game_loop(this::Main, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhysicsTime::Ref{UInt64} = Ref(UInt64(0)), windowPos::Math.Vector2 = Math.Vector2(0,0), windowSize::Math.Vector2 = Math.Vector2(0,0))
+function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhysicsTime::Ref{UInt64} = Ref(UInt64(0)), windowPos::Math.Vector2 = Math.Vector2(0,0), windowSize::Math.Vector2 = Math.Vector2(0,0))
 	if this.shouldChangeScene && !JulGame.IS_EDITOR
 		this.shouldChangeScene = false
 		initialize_new_scene(this)
@@ -674,7 +674,7 @@ function game_loop(this::Main, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhys
 		end
     end
 
-	function render_scene_sprites_and_shapes(this::Main, camera::Camera)
+	function render_scene_sprites_and_shapes(this::MainLoop, camera::Camera)
 		cameraPosition = camera !== nothing ? camera.position : Math.Vector2f(0,0)
 		cameraSize = camera !== nothing ? camera.size : Math.Vector2(0,0)
 			
@@ -731,13 +731,13 @@ function game_loop(this::Main, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhys
 		end
 	end
 
-	function start_game_in_editor(this::Main, path::String)
+	function start_game_in_editor(this::MainLoop, path::String)
 		this.isGameModeRunningInEditor = true
 		SceneBuilderModule.add_scripts_to_entities(path)
 		initialize_scripts_and_components()
 	end
 
-	function stop_game_in_editor(this::Main)
+	function stop_game_in_editor(this::MainLoop)
 		this.isGameModeRunningInEditor = false
 		SDL2.Mix_HaltMusic()
 		if this.scene.camera !== nothing && this.scene.camera != C_NULL
@@ -745,7 +745,7 @@ function game_loop(this::Main, startTime::Ref{UInt64} = Ref(UInt64(0)), lastPhys
 		end
 	end
 
-	function render_scene_debug(this::Main, cameraPosition, cameraSize, DEBUG)
+	function render_scene_debug(this::MainLoop, cameraPosition, cameraSize, DEBUG)
 		colliderSkipCount = 0
 		colliderRenderCount = 0
 		for entity in this.scene.entities

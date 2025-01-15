@@ -158,7 +158,7 @@ module SceneBuilderModule
         add_scripts_to_entities(BasePath)
 
         MAIN.assets = joinpath(BasePath, "assets")
-        JulGame.MainLoop.prepare_window_scripts_and_start_loop(size, isResizable, autoScaleZoom)
+        JulGame.MainLoopModule.prepare_window_scripts_and_start_loop(size, isResizable, autoScaleZoom)
     end
 
     function deserialize_and_build_scene(this::Scene)

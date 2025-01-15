@@ -71,7 +71,7 @@ module JulGame
     using .SceneManagement
     export SceneBuilderModule, SceneLoaderModule, SceneReaderModule, SceneWriterModule 
     
-    include("Main.jl") 
-    using .MainLoop: Main
-    export Main
+    include("MainLoop.jl") 
+    using .MainLoopModule: MainLoop
+    export MainLoop
 end

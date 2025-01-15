@@ -7,7 +7,7 @@ module Editor
     using CImGui: ImVec2, ImVec4, IM_COL32, ImS32, ImU32, ImS64, ImU64
     using CImGui.CImGui
     using Dates
-    using JulGame: Component, MainLoop, Math, SceneLoaderModule, SDL2, UI
+    using JulGame: Component, MainLoopModule, Math, SceneLoaderModule, SDL2, UI
     using NativeFileDialog
     
     global sdlVersion = "2.0.0"
@@ -252,10 +252,10 @@ module Editor
                         sceneWindowSize = show_scene_window(currentSceneMain, sceneTexture, scrolling, zoom_level, duplicationMode, camera)
                         if playMode != wasPlaying && currentSceneMain !== nothing
                             if playMode
-                                JulGame.MainLoop.start_game_in_editor(currentSceneMain, currentSelectedProjectPath[])
+                                JulGame.MainLoopModule.start_game_in_editor(currentSceneMain, currentSelectedProjectPath[])
                                 currentSceneMain.scene.camera = gameCamera 
                             elseif !playMode
-                                JulGame.MainLoop.stop_game_in_editor(currentSceneMain)
+                                JulGame.MainLoopModule.stop_game_in_editor(currentSceneMain)
                                 JulGame.change_scene(String(currentSceneName))
                             end
                         end
@@ -295,7 +295,7 @@ module Editor
                                 CImGui.MenuItem("Add", C_NULL, false, false)
                                 if CImGui.BeginMenu("New")
                                     if CImGui.MenuItem("Entity")
-                                        JulGame.MainLoop.create_new_entity(currentSceneMain)
+                                        JulGame.MainLoopModule.create_new_entity(currentSceneMain)
                                     end
                                     
                                     CImGui.EndMenu()
@@ -345,10 +345,10 @@ module Editor
                                 CImGui.MenuItem("Add", C_NULL, false, false)
                                 if CImGui.BeginMenu("New")
                                     if CImGui.MenuItem("TextBox")
-                                        JulGame.MainLoop.create_new_text_box(currentSceneMain) 
+                                        JulGame.MainLoopModule.create_new_text_box(currentSceneMain) 
                                     end
                                     if CImGui.MenuItem("Screen Button")
-                                        JulGame.MainLoop.create_new_screen_button(currentSceneMain)
+                                        JulGame.MainLoopModule.create_new_screen_button(currentSceneMain)
                                     end
                                     
                                     CImGui.EndMenu()
@@ -479,7 +479,7 @@ module Editor
                     SDL2.SDL_RenderClear(renderer)
                     try
                         if currentSceneMain !== nothing
-                            JulGame.MainLoop.render_scene_sprites_and_shapes(currentSceneMain, camera)
+                            JulGame.MainLoopModule.render_scene_sprites_and_shapes(currentSceneMain, camera)
                         end
                     catch e
                         handle_editor_exceptions("Scene window:", latest_exceptions, e, is_test_mode)
@@ -490,14 +490,14 @@ module Editor
                     try 
                         if currentSceneMain !== nothing
                             JulGame.CameraModule.update(gameCamera)
-                            JulGame.MainLoop.render_scene_sprites_and_shapes(currentSceneMain, gameCamera)
+                            JulGame.MainLoopModule.render_scene_sprites_and_shapes(currentSceneMain, gameCamera)
                         end
                     catch e
                         handle_editor_exceptions("Game window:", latest_exceptions, e, is_test_mode)
                     end
 
                     try
-                        gameInfo = currentSceneMain === nothing ? [] : JulGame.MainLoop.game_loop(currentSceneMain, startTime, lastPhysicsTime, Math.Vector2(sceneWindowPos.x + 8, sceneWindowPos.y + 25), Math.Vector2(sceneWindowSize.x, sceneWindowSize.y)) # Magic numbers for the border of the imgui window. TODO: Make this dynamic if possible
+                        gameInfo = currentSceneMain === nothing ? [] : JulGame.MainLoopModule.game_loop(currentSceneMain, startTime, lastPhysicsTime, Math.Vector2(sceneWindowPos.x + 8, sceneWindowPos.y + 25), Math.Vector2(sceneWindowSize.x, sceneWindowSize.y)) # Magic numbers for the border of the imgui window. TODO: Make this dynamic if possible
                     catch e
                         handle_editor_exceptions("Game loop:", latest_exceptions, e, is_test_mode)
                     end

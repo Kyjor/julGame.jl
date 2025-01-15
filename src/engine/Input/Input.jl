@@ -117,6 +117,9 @@ module InputModule
 
                     insideAnyButton = false
                     for uiElement in MAIN.scene.uiElements
+                        if !uiElement.isActive
+                            return
+                        end
                         # Check position of button to see which we are interacting with
                         eventWasInsideThisButton = true
                         if x[1] < uiElement.position.x + MAIN.scene.camera.startingCoordinates.x
@@ -253,7 +256,7 @@ module InputModule
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_RESIZED # todo: update zoom and viewport size here
             if !JulGame.IS_EDITOR
                 @debug(string("Window $(event.window.windowID) resized to $(event.window.data1)x$(event.window.data2)"))
-                JulGame.MainLoop.update_viewport(MAIN, event.window.data1, event.window.data2)
+                JulGame.MainLoopModule.update_viewport(MAIN, event.window.data1, event.window.data2)
             end
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_SIZE_CHANGED
             @debug(string("Window $(event.window.windowID) size changed to $(event.window.data1)x$(event.window.data2)"))

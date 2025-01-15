@@ -139,7 +139,7 @@ function main()
 		println( "Failed to initialize!\n" )
 	else
 	
-		#Main loop flag
+		#MainLoop loop flag
 		quit = false
 
 		#Event handler
