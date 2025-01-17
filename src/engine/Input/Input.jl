@@ -9,6 +9,7 @@ module InputModule
         buttonsHeldDown::Vector{String}
         buttonsReleased::Vector{String}
         debug::Bool
+        didMouseEventOccur::Bool
         editorCallback::Union{Function, Nothing}
         isWindowFocused::Bool
         main
@@ -16,6 +17,7 @@ module InputModule
         mouseButtonsHeldDown::Vector
         mouseButtonsReleased::Vector
         mousePosition
+        mousePositionWorld
         joystick
         scanCodeStrings::Vector{String}
         scanCodes::Vector
@@ -40,12 +42,14 @@ module InputModule
             this.buttonsHeldDown = []
             this.buttonsReleased = []
             this.debug = false
+            this.didMouseEventOccur = false
             this.editorCallback = nothing
             this.isWindowFocused = true
             this.mouseButtonsPressedDown = []
             this.mouseButtonsHeldDown = []
             this.mouseButtonsReleased = []
             this.mousePosition = Math.Vector2(0,0)
+            this.mousePositionWorld = Math.Vector2(0,0)
             this.quit = false
             this.scanCodes = []
             this.scanCodeStrings = String[]
@@ -60,7 +64,7 @@ module InputModule
 
             SDL2.SDL_Init(UInt64(SDL2.SDL_INIT_JOYSTICK))
             if SDL2.SDL_NumJoysticks() < 1
-                println("Warning: No joysticks connected!")
+                @debug("Warning: No joysticks connected!")
                 this.numAxes = 0
                 this.numButtons = 0
                 this.numHats = 0
@@ -68,17 +72,17 @@ module InputModule
                 # Load joystick
                 this.joystick = SDL2.SDL_JoystickOpen(0)
                 if this.joystick == C_NULL
-                    println("Warning: Unable to open game controller! SDL Error: ", unsafe_string(SDL2.SDL_GetError()))
+                    @debug("Warning: Unable to open game controller! SDL Error: ", unsafe_string(SDL2.SDL_GetError()))
                 end
                 name = SDL2.SDL_JoystickName(this.joystick)
                 this.numAxes = SDL2.SDL_JoystickNumAxes(this.joystick)
                 this.numButtons = SDL2.SDL_JoystickNumButtons(this.joystick)
                 this.numHats = SDL2.SDL_JoystickNumHats(this.joystick)
 
-                println("Now reading from joystick '$(unsafe_string(name))' with:")
-                println("$(this.numAxes) axes")
-                println("$(this.numButtons) buttons")
-                println("$(this.numHats) hats")
+                @debug("Now reading from joystick '$(unsafe_string(name))' with:")
+                @debug("$(this.numAxes) axes")
+                @debug("$(this.numButtons) buttons")
+                @debug("$(this.numHats) hats")
 
             end
             this.jaxis = C_NULL
@@ -95,21 +99,25 @@ module InputModule
 
     function poll_input(this::Input)
         this.buttonsPressedDown = []
-        didMouseEventOccur = false
+        this.didMouseEventOccur = false
         event_ref = Ref{SDL2.SDL_Event}()
+       # @info "polling input"
+       x,y = Int32[1], Int32[1]
+       SDL2.SDL_GetMouseState(pointer(x), pointer(y))
+       this.mousePosition = Math.Vector2(x[1], y[1])
+       #@info "new mouse pos: $(this.mousePosition)"
+
         while Bool(SDL2.SDL_PollEvent(event_ref))
             evt = event_ref[]
             handle_window_events(this, evt)
             if this.editorCallback !== nothing
                 this.editorCallback(evt)
             end
+
             if evt.type == SDL2.SDL_MOUSEMOTION || evt.type == SDL2.SDL_MOUSEBUTTONDOWN || evt.type == SDL2.SDL_MOUSEBUTTONUP
-                didMouseEventOccur = true
+                this.didMouseEventOccur = true
+
                 if MAIN.scene.uiElements !== nothing
-                    x,y = Int32[1], Int32[1]
-                    SDL2.SDL_GetMouseState(pointer(x), pointer(y))
-                    
-                    this.mousePosition = Math.Vector2(x[1], y[1])
                     if MAIN.scene.camera === nothing
                         @warn ("Camera is not set in the main scene.")
                         continue
@@ -118,17 +126,17 @@ module InputModule
                     insideAnyButton = false
                     for uiElement in MAIN.scene.uiElements
                         if !uiElement.isActive
-                            return
+                            continue
                         end
                         # Check position of button to see which we are interacting with
                         eventWasInsideThisButton = true
-                        if x[1] < uiElement.position.x + MAIN.scene.camera.startingCoordinates.x
+                        if this.mousePosition.x < uiElement.position.x + MAIN.scene.camera.startingCoordinates.x
                             eventWasInsideThisButton = false
-                        elseif x[1] > MAIN.scene.camera.startingCoordinates.x + uiElement.position.x + uiElement.size.x * MAIN.zoom
+                        elseif this.mousePosition.x > MAIN.scene.camera.startingCoordinates.x + uiElement.position.x + uiElement.size.x * MAIN.zoom
                             eventWasInsideThisButton = false
-                        elseif y[1] < uiElement.position.y + MAIN.scene.camera.startingCoordinates.y
+                        elseif this.mousePosition.y < uiElement.position.y + MAIN.scene.camera.startingCoordinates.y
                             eventWasInsideThisButton = false
-                        elseif y[1] > MAIN.scene.camera.startingCoordinates.y + uiElement.position.y + uiElement.size.y * MAIN.zoom
+                        elseif this.mousePosition.y > MAIN.scene.camera.startingCoordinates.y + uiElement.position.y + uiElement.size.y * MAIN.zoom
                             eventWasInsideThisButton = false
                         end
 
@@ -142,7 +150,7 @@ module InputModule
                             SDL2.SDL_SetCursor(this.cursorBank["crosshair"])
                         end
                         
-                        JulGame.UI.handle_event(uiElement, evt, x[1], y[1])
+                        JulGame.UI.handle_event(uiElement, evt, this.mousePosition.x, this.mousePosition.y)
                     end
 
                     if !insideAnyButton
@@ -160,7 +168,7 @@ module InputModule
                 for i in 0:this.numAxes-1
                     axis = SDL2.SDL_JoystickGetAxis(this.joystick, i)
                     if i < 0
-                        println("Axis $i: $(SDL2.SDL_JoystickGetAxis(this.joystick, i))")
+                        @debug("Axis $i: $(SDL2.SDL_JoystickGetAxis(this.joystick, i))")
                     end
                     JOYSTICK_DEAD_ZONE = 8000
 
@@ -185,12 +193,12 @@ module InputModule
                     end
 
                 end
-                # println("x:$(this.xDir), y:$(this.yDir)")
+                # @debug("x:$(this.xDir), y:$(this.yDir)")
                 for i in 0:this.numButtons-1
                     button = SDL2.SDL_JoystickGetButton(this.joystick, i)
 
                     if button != 0
-                        println("Button $i: $(button)")
+                        @debug("Button $i: $(button)")
                     end
                     if i == 0 && button == 1
                         this.button = 1
@@ -203,7 +211,7 @@ module InputModule
 
                     hat = SDL2.SDL_JoystickGetHat(this.joystick, i)
                     if hat != 0
-                        println("Hat $i: $(hat)")
+                        @debug("Hat $i: $(hat)")
                     end
                 end
                 
@@ -217,7 +225,7 @@ module InputModule
                 this.debug = !this.debug
             end
         end
-        if !didMouseEventOccur
+        if !this.didMouseEventOccur
             this.mouseButtonsPressedDown = []
             this.mouseButtonsReleased = []
         end
@@ -232,7 +240,7 @@ module InputModule
                     return true
                 end
             catch
-                println("Error checking scan code $(scanCode) at index $(Int32(scanCode) + 1)")
+                @error("Error checking scan code $(scanCode) at index $(Int32(scanCode) + 1)")
             end
         end
         return false
