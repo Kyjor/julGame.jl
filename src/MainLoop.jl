@@ -21,7 +21,6 @@ module MainLoopModule
 		isGameModeRunningInEditor::Bool
 		isWindowFocused::Bool
 		level::JulGame.SceneManagement.SceneBuilderModule.Scene
-		mousePositionWorld::Union{Math.Vector2, Math.Vector2f}
 		optimizeSpriteRendering::Bool
 		scene::SceneModule.Scene
 		selectedEntity::Union{Entity, Nothing}
@@ -48,7 +47,6 @@ module MainLoopModule
 			this.close = false
 			this.debugTextBoxes = UI.TextBoxModule.TextBox[]
 			this.isWindowFocused = false
-			this.mousePositionWorld = Math.Vector2f()
 			this.optimizeSpriteRendering = false
 			this.selectedEntity = nothing
 			this.selectedUIElementIndex = -1
@@ -534,26 +532,18 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 			lastStartTime = startTime[]
 			startTime[] = SDL2.SDL_GetPerformanceCounter()
 
-			if JulGame.IS_EDITOR && this.scene.camera !== nothing
-				#this.scene.camera.size = Math.Vector2(windowSize.x, windowSize.y)
-			end
-
 			DEBUG = false
 			#region Input
 			if !JulGame.IS_EDITOR
 				JulGame.InputModule.poll_input(this.input)
-			end
 
-			if this.input.quit && !JulGame.IS_EDITOR
-				this.close = true
-			end
-			DEBUG = this.input.debug
-
-			cameraPosition = Math.Vector2f()
-
-			if !JulGame.IS_EDITOR
+				this.close = this.input.quit
 				SDL2.SDL_RenderClear(JulGame.Renderer::Ptr{SDL2.SDL_Renderer})
 			end
+
+			DEBUG = this.input.debug
+			cameraPosition = this.scene.camera !== nothing ? (this.scene.camera.position + this.scene.camera.offset) : Math.Vector2f(0,0)
+			cameraSize = this.scene.camera !== nothing ? this.scene.camera.size : Math.Vector2(0,0)
 
 			#region Physics
 			if !JulGame.IS_EDITOR || this.isGameModeRunningInEditor
@@ -616,9 +606,6 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 				end
 			end
 			
-			cameraPosition = this.scene.camera !== nothing ? this.scene.camera.position : Math.Vector2f(0,0)
-			cameraSize = this.scene.camera !== nothing ? this.scene.camera.size : Math.Vector2(0,0)
-			
 			if !JulGame.IS_EDITOR
 				render_scene_sprites_and_shapes(this, this.scene.camera)
 			end
@@ -631,7 +618,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 			end
 
 			pos1::Math.Vector2 = windowPos !== nothing ? windowPos : Math.Vector2(0, 0)
-			this.mousePositionWorld = Math.Vector2(floor(Int32,(this.input.mousePosition.x + (cameraPosition.x * SCALE_UNITS * this.zoom)) / SCALE_UNITS / this.zoom), floor(Int32,( this.input.mousePosition.y + (cameraPosition.y * SCALE_UNITS * this.zoom)) / SCALE_UNITS / this.zoom))
+			this.input.mousePositionWorld = Math.Vector2(floor(Int32,(this.input.mousePosition.x + (cameraPosition.x * SCALE_UNITS * this.zoom)) / SCALE_UNITS / this.zoom), floor(Int32,( this.input.mousePosition.y + (cameraPosition.y * SCALE_UNITS * this.zoom)) / SCALE_UNITS / this.zoom))
 			rawMousePos = Math.Vector2f(this.input.mousePosition.x - pos1.x , this.input.mousePosition.y - pos1.y )
 			#region Debug
 			if DEBUG
@@ -640,7 +627,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 					"FPS: $(round(1000 / round((startTime[] - lastStartTime) / SDL2.SDL_GetPerformanceFrequency() * 1000.0)))",
 					"Frame time: $(round((startTime[] - lastStartTime) / SDL2.SDL_GetPerformanceFrequency() * 1000.0)) ms",
 					"Raw Mouse pos: $(rawMousePos.x),$(rawMousePos.y)",
-					"Mouse pos world: $(this.mousePositionWorld.x),$(this.mousePositionWorld.y)"
+					"Mouse pos world: $(this.input.mousePositionWorld.x),$(this.input.mousePositionWorld.y)"
 				]
 
 				if length(this.debugTextBoxes) == 0
