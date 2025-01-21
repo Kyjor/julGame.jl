@@ -402,4 +402,87 @@ module InputModule
         this.cursorBank["no"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_NO)
         this.cursorBank["hand"] = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_HAND)
     end
-end
+
+    # Initialize an SDL_Event instance
+    function init_sdl_event()::Ptr{SDL2.SDL_Event}
+        # Create a vector of UInt8
+        data = UInt8[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] 
+        
+         # Convert the vector to a tuple of size 56
+        ntuple_data = Tuple(data)
+
+        # Allocate memory for the SDL_Event struct itself
+        ptr_event = Ptr{SDL2.SDL_Event}(Libc.malloc(sizeof(SDL2.SDL_Event)))  # Allocate memory for SDL_Event struct
+
+        # Now, initialize the data field of the struct using unsafe_store!
+        unsafe_store!(ptr_event, SDL2.SDL_Event(ntuple_data))
+
+        # Return the pointer to the struct
+        return ptr_event
+    end
+
+    function init_mouse_button_event()::Ptr{SDL2.SDL_MouseButtonEvent}
+        # Allocate memory for SDL_MouseButtonEvent struct
+        ptr_event = Ptr{SDL2.SDL_MouseButtonEvent}(Libc.malloc(sizeof(SDL2.SDL_MouseButtonEvent)))
+    
+        # Initialize the fields directly
+        unsafe_store!(ptr_event, SDL2.SDL_MouseButtonEvent(
+            0x0,             # type (just an example, you'll set this later)
+            0x0,             # timestamp
+            0x0,             # windowID
+            0x0,             # which (mouse)
+            0x0,             # button (mouse button)
+            0x0,             # state (pressed/released)
+            0x0,             # clicks
+            0x0,             # padding
+            0x0,             # x (position)
+            0x0              # y (position)
+        ))
+    
+        # Return the pointer to the struct
+        return ptr_event
+    end    
+
+    function simulate_mouse_click(window::Ptr{SDL2.SDL_Window}, x::Int32, y::Int32)
+        # Move the mouse to the specified position
+        SDL2.SDL_WarpMouseInWindow(window, x, y)
+        
+        # Create a mouse button down event
+        mouse_event::Ptr{SDL2.SDL_Event} = init_sdl_event()
+        mouse_event.type = SDL2.SDL_MOUSEBUTTONDOWN
+
+        mouse_event.button = SDL2.SDL_MouseButtonEvent(
+            SDL2.SDL_MOUSEBUTTONDOWN,  # Type of event
+            0,                        # Timestamp (0 for automatic)
+            0,                        # Window ID (0 for default window)
+            0,                        # Which mouse (0 for the primary mouse)
+            SDL2.SDL_BUTTON_LEFT,      # Button being pressed
+            SDL2.SDL_PRESSED,          # Button state (pressed)
+            1,                         # Clicks (1 for single click)
+            0,                         # Padding (unused, set to 0)
+            x,                         # X position
+            y                          # Y position
+        ) 
+        SDL2.SDL_PushEvent(mouse_event)
+
+        mouse_event.button = SDL2.SDL_MouseButtonEvent(
+            SDL2.SDL_MOUSEBUTTONUP,  # Type of event
+            0,                        # Timestamp (0 for automatic)
+            0,                        # Window ID (0 for default window)
+            0,                        # Which mouse (0 for the primary mouse)
+            SDL2.SDL_BUTTON_LEFT,      # Button being pressed
+            SDL2.SDL_PRESSED,          # Button state (pressed)
+            1,                         # Clicks (1 for single click)
+            0,                         # Padding (unused, set to 0)
+            x,                         # X position
+            y                          # Y position
+        ) 
+        SDL2.SDL_PushEvent(mouse_event)
+    end
+end # module InputModule
