@@ -114,7 +114,7 @@ module MainLoopModule
                     if this.testMode
                         throw(e)
                     else
-						if JulGame.IS_EDITOR
+						if JulGame.IS_EDITOR || this.testMode
 							rethrow(e)
 						else
 							@error string(e)
@@ -132,7 +132,7 @@ module MainLoopModule
                     try
                         Base.invokelatest(JulGame.on_shutdown, script)
                     catch e
-						if JulGame.IS_EDITOR
+						if JulGame.IS_EDITOR || this.testMode
 							rethrow(e)
 						else
 							if typeof(e) != ErrorException
@@ -263,7 +263,7 @@ function initialize_scripts_and_components()
 			try
 				Base.invokelatest(JulGame.initialize, script)
 			catch e
-				if JulGame.IS_EDITOR
+				if JulGame.IS_EDITOR || this.testMode
 					rethrow(e)
 				else
 					@error string(e)
@@ -331,7 +331,7 @@ function JulGame.change_scene(sceneFileName::String)
 				try
 					Base.invokelatest(JulGame.on_shutdown, script)
 				catch e
-					if JulGame.IS_EDITOR
+					if JulGame.IS_EDITOR || this.testMode
 						rethrow(e)
 					else
 						if typeof(e) != ErrorException
@@ -560,7 +560,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 					try
 						JulGame.update(rigidbody, deltaTime)
 					catch e
-						if JulGame.IS_EDITOR
+						if JulGame.IS_EDITOR || this.testMode
 							rethrow(e)
 						else
 							println(rigidbody.parent.name, " with id: ", rigidbody.parent.id, " has a problem with it's rigidbody")
@@ -591,7 +591,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 							return
 						end
 					catch e
-						if JulGame.IS_EDITOR
+						if JulGame.IS_EDITOR || this.testMode
 							rethrow(e)
 						else
 							println(entity.name, " with id: ", entity.id, " has a problem with it's update")
@@ -652,7 +652,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 				SDL2.SDL_framerateDelay(this.fpsManager)
 			end
 		catch e
-			if JulGame.IS_EDITOR
+			if JulGame.IS_EDITOR || this.testMode
 				rethrow(e)
 			else
 				@error string(e)
@@ -707,7 +707,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 				rendercount += 1
 				Component.draw(renderOrder[i][2], camera)
 			catch e
-				if JulGame.IS_EDITOR
+				if JulGame.IS_EDITOR || this.testMode
 					rethrow(e)
 				else
 					println(renderOrder[i][2].parent.name, " with id: ", renderOrder[i][2].parent.id, " has a problem with it's sprite")
