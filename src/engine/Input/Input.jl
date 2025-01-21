@@ -101,15 +101,18 @@ module InputModule
         this.buttonsPressedDown = []
         this.didMouseEventOccur = false
         event_ref = Ref{SDL2.SDL_Event}()
-       # @info "polling input"
-       x,y = Int32[1], Int32[1]
-       SDL2.SDL_GetMouseState(pointer(x), pointer(y))
-       this.mousePosition = Math.Vector2(x[1], y[1])
-       #@info "new mouse pos: $(this.mousePosition)"
+       
 
         while Bool(SDL2.SDL_PollEvent(event_ref))
             evt = event_ref[]
             handle_window_events(this, evt)
+
+            # @info "polling input"
+            x,y = Int32[1], Int32[1]
+            SDL2.SDL_GetMouseState(pointer(x), pointer(y))
+            this.mousePosition = Math.Vector2(x[1], y[1])
+            #@info "new mouse pos: $(this.mousePosition)"
+
             if this.editorCallback !== nothing
                 this.editorCallback(evt)
             end
@@ -123,7 +126,7 @@ module InputModule
                         continue
                     end
 
-                    insideAnyButton = false
+                    insideAnyElement = false
                     for uiElement in MAIN.scene.uiElements
                         if !uiElement.isActive
                             continue
@@ -144,7 +147,7 @@ module InputModule
                             uiElement.isHovered = false
                             continue
                         end
-                        insideAnyButton = true
+                        insideAnyElement = true
 
                         if split("$(typeof(uiElement))", ".")[end] == "ScreenButton"
                             SDL2.SDL_SetCursor(this.cursorBank["crosshair"])
@@ -153,7 +156,7 @@ module InputModule
                         JulGame.UI.handle_event(uiElement, evt, this.mousePosition.x, this.mousePosition.y)
                     end
 
-                    if !insideAnyButton
+                    if !insideAnyElement
                         SDL2.SDL_SetCursor(this.cursorBank["arrow"])
                     end
                 end
