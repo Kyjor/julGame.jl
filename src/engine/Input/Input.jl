@@ -35,6 +35,9 @@ module InputModule
         # Cursor bank 
         cursorBank::Dict{String, Ptr{SDL2.SDL_SystemCursor}} # Key is the name of the cursor, value is the SDL2 cursor
 
+        # Testing
+        isTestButtonClicked::Bool
+
         function Input()
             this = new()
 
@@ -93,6 +96,8 @@ module InputModule
             this.cursorBank = Dict{String, SDL2.SDL_SystemCursor}() 
             create_cursor_bank(this)
 
+            this.isTestButtonClicked = false
+
             return this
         end
     end
@@ -119,6 +124,9 @@ module InputModule
 
             if evt.type == SDL2.SDL_MOUSEMOTION || evt.type == SDL2.SDL_MOUSEBUTTONDOWN || evt.type == SDL2.SDL_MOUSEBUTTONUP
                 this.didMouseEventOccur = true
+                if evt.type == SDL2.SDL_MOUSEBUTTONDOWN
+                    println("Mouse button down at $(this.mousePosition)")
+                end
 
                 if MAIN.scene.uiElements !== nothing
                     if MAIN.scene.camera === nothing
@@ -227,13 +235,17 @@ module InputModule
             if evt.type == SDL2.SDL_KEYDOWN && evt.key.keysym.scancode == SDL2.SDL_SCANCODE_F3
                 this.debug = !this.debug
             end
+
+            keyboardState = unsafe_wrap(Array, SDL2.SDL_GetKeyboardState(C_NULL), 300; own = false)
+            handle_key_event(this, keyboardState)
+        end
+        if this.isTestButtonClicked
+            lift_mouse_after_simulated_click(this)
         end
         if !this.didMouseEventOccur
             this.mouseButtonsPressedDown = []
             this.mouseButtonsReleased = []
         end
-        keyboardState = unsafe_wrap(Array, SDL2.SDL_GetKeyboardState(C_NULL), 300; own = false)
-        handle_key_event(this, keyboardState)
     end
 
     function check_scan_code(this::Input, keyboardState, keyState, scanCodes)
@@ -318,35 +330,26 @@ module InputModule
     end
 
     function handle_mouse_event(this::Input, event)
-        mouseButtons = []
-        mouseButtonsUp = []
-        mouseButton = C_NULL
-        mouseButtonUp = C_NULL
-
         if event.button.button == SDL2.SDL_BUTTON_LEFT || event.button.button == SDL2.SDL_BUTTON_MIDDLE || event.button.button == SDL2.SDL_BUTTON_RIGHT
-            if !(mouseButton in mouseButtons)
-                if event.type == SDL2.SDL_MOUSEBUTTONDOWN
-                    mouseButton = event.button.button
-                    push!(mouseButtons, mouseButton)
-                elseif event.type == SDL2.SDL_MOUSEBUTTONUP
-                    mouseButtonUp = event.button.button
-                    push!(mouseButtonsUp, mouseButtonUp)
-                end
+            button = event.button.button
+            if event.type == SDL2.SDL_MOUSEBUTTONDOWN && !(button in this.mouseButtonsPressedDown)
+                push!(this.mouseButtonsPressedDown, button)
+            elseif event.type == SDL2.SDL_MOUSEBUTTONUP && !(button in this.mouseButtonsReleased)
+                push!(this.mouseButtonsReleased, button)
+            end            
+        end
+
+        for button in this.mouseButtonsPressedDown
+            if !(button in this.mouseButtonsHeldDown)
+                push!(this.mouseButtonsHeldDown, button)
             end
         end
 
-        this.mouseButtonsPressedDown = mouseButtons
-        for mouseButton in mouseButtons
-            if !(mouseButton in this.mouseButtonsHeldDown)
-                push!(this.mouseButtonsHeldDown, mouseButton)
+        for button in this.mouseButtonsReleased
+            if button in this.mouseButtonsHeldDown
+                deleteat!(this.mouseButtonsHeldDown, findfirst(x -> x == button, this.mouseButtonsHeldDown))
             end
         end
-        for mouseButton in mouseButtonsUp
-            if mouseButton in this.mouseButtonsHeldDown
-                deleteat!(this.mouseButtonsHeldDown, findfirst(x -> x == mouseButton, this.mouseButtonsHeldDown))
-            end
-        end
-        this.mouseButtonsReleased = mouseButtonsUp
     end
 
     function get_button_held_down(this::Input, button::String)
@@ -452,7 +455,7 @@ module InputModule
         return ptr_event
     end    
 
-    function simulate_mouse_click(window::Ptr{SDL2.SDL_Window}, x::Int32, y::Int32)
+    function simulate_mouse_click(this::Input, window::Ptr{SDL2.SDL_Window}, x::Int32, y::Int32)
         # Move the mouse to the specified position
         SDL2.SDL_WarpMouseInWindow(window, x, y)
         
@@ -473,19 +476,25 @@ module InputModule
             y                          # Y position
         ) 
         SDL2.SDL_PushEvent(mouse_event)
+        this.isTestButtonClicked = true
+    end
 
+    function lift_mouse_after_simulated_click(this)
+        mouse_event::Ptr{SDL2.SDL_Event} = init_sdl_event()
+        mouse_event.type = SDL2.SDL_MOUSEBUTTONUP
         mouse_event.button = SDL2.SDL_MouseButtonEvent(
             SDL2.SDL_MOUSEBUTTONUP,  # Type of event
             0,                        # Timestamp (0 for automatic)
             0,                        # Window ID (0 for default window)
             0,                        # Which mouse (0 for the primary mouse)
             SDL2.SDL_BUTTON_LEFT,      # Button being pressed
-            SDL2.SDL_PRESSED,          # Button state (pressed)
+            SDL2.SDL_RELEASED,          # Button state (pressed)
             1,                         # Clicks (1 for single click)
             0,                         # Padding (unused, set to 0)
-            x,                         # X position
-            y                          # Y position
+            0,                         # X position # todo: get actual mouse position
+            0                          # Y position # todo: get actual mouse position
         ) 
         SDL2.SDL_PushEvent(mouse_event)
+        this.isTestButtonClicked = false
     end
 end # module InputModule
