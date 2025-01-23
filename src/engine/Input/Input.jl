@@ -125,7 +125,7 @@ module InputModule
             if evt.type == SDL2.SDL_MOUSEMOTION || evt.type == SDL2.SDL_MOUSEBUTTONDOWN || evt.type == SDL2.SDL_MOUSEBUTTONUP
                 this.didMouseEventOccur = true
                 if evt.type == SDL2.SDL_MOUSEBUTTONDOWN
-                    println("Mouse button down at $(this.mousePosition)")
+                    @debug("Mouse button down at $(this.mousePosition)")
                 end
 
                 if MAIN.scene.uiElements !== nothing
@@ -496,5 +496,33 @@ module InputModule
         ) 
         SDL2.SDL_PushEvent(mouse_event)
         this.isTestButtonClicked = false
+    end
+
+    function simulate_key_press(this::Input, key::String)
+        # Create a keyboard event
+        key_event::Ptr{SDL2.SDL_Event} = init_sdl_event()
+        key_event.type = SDL2.SDL_KEYDOWN
+        key_event.key = SDL2.SDL_KeyboardEvent(
+            SDL2.SDL_KEYDOWN,  # Type of event
+            0,                 # Timestamp (0 for automatic)
+            0,                 # Window ID (0 for default window)
+            0,                 # State (pressed)
+            0,                 # Repeat (0 for no repeat)
+            0,                 # Padding
+            0,                 # Padding
+            SDL2.SDL_Keysym(   # Keysym structure
+                SDL2.SDL_SCANCODE_SPACE, # Scancode
+                0,  # Keycode
+                0,                                   # Modifiers (none)
+                0                                    # Window ID (0 for default window)
+            )
+        )
+        # key_event.key.keysym.sym = SDL2.SDL_Keycode(uppercase(key))
+        # key_event.key.keysym.scancode = SDL2.SDL_Scancode(uppercase(key))
+        # key_event.key.keysym.mod = 0
+        # key_event.key.keysym.windowID = 0
+
+        # Push the event to the event queue
+        SDL2.SDL_PushEvent(key_event)
     end
 end # module InputModule
