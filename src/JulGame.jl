@@ -17,7 +17,7 @@ module JulGame
     export DELTA_TIME, IS_EDITOR, SDL2, SDL2E, MAIN
 
     include("utils/Structs.jl")
-    export EditorExport
+    export EditorExport, StatefulEnum
     
     include("utils/Types.jl")
     export Script

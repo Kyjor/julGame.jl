@@ -190,9 +190,9 @@ module SceneWriterModule
                     "position" => Dict("x" => component.position.x, "y" => component.position.y),
                     "rotation" => component.rotation,
                     "center" => Dict("x" => component.center.x, "y" => component.center.y),
-                    "color" => Dict("x" => component.color.x, "y" => component.color.y, "z" => component.color.z),
+                    "color" => Dict("x" => component.color[1], "y" => component.color[2], "z" => component.color[3], "t" => component.color[4]),
                     "size" => Dict("x" => component.size.x, "y" => component.size.y),
-                    )
+                )
                 push!(componentsDict, serializedComponent)
             elseif "$componentType" != "Ptr"
                 println("Component type $(componentType) not supported")

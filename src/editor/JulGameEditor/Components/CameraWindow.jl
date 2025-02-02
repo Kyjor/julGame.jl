@@ -74,14 +74,6 @@ function show_camera_window(this::CameraWindow)
             end
             
             # camera background color
-            # CImGui.Text("Background Color:")
-            # color_r = UInt8(this.camera.backgroundColor[1])
-            # color_g = UInt8(this.camera.backgroundColor[2])
-            # color_b = UInt8(this.camera.backgroundColor[3])
-            # color_a = UInt8(this.camera.backgroundColor[4])
-
-            # CImGui.ColorEdit4("Background Color", Ref(color_r), Ref(color_g), Ref(color_b), Ref(color_a))
-            # this.camera.backgroundColor = (color_r, color_g, color_b, color_a)
             CImGui.PopItemWidth()
             color = (Cfloat(this.camera.backgroundColor[1]/255), Cfloat(this.camera.backgroundColor[2]/255), Cfloat(this.camera.backgroundColor[3]/255), Cfloat(this.camera.backgroundColor[4]/255))
             colorCfloat = Cfloat[Cfloat(this.camera.backgroundColor[1]/255), Cfloat(this.camera.backgroundColor[2]/255), Cfloat(this.camera.backgroundColor[3]/255), Cfloat(this.camera.backgroundColor[4]/255)]

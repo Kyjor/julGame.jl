@@ -167,7 +167,7 @@ module SceneReaderModule
             elseif component.type == "SoundSource"
                 newComponent = SoundSource(Int32(component.channel), component.isMusic, component.path, get(component, "playOnStart", false), Int32(component.volume))
             elseif component.type == "Sprite"
-                color = !haskey(component, "color") || isempty(component.color) ? Vector3(255,255,255) : Vector3(component.color.x, component.color.y, component.color.z)
+                color = !haskey(component, "color") || isempty(component.color) ? (255,255,255,255) : (get(component.color, "x", 255), get(component.color, "y", 255), get(component.color, "z", 255), get(component.color, "t", 255))
                 crop = !haskey(component, "crop") || isempty(component.crop) ? Vector4(0,0,0,0) : Vector4(component.crop.x, component.crop.y, component.crop.z, component.crop.t)
                 isWorldEntity = !haskey(component, "isWorldEntity") ? true : component.isWorldEntity
                 layer = !haskey(component, "layer") ? 0 : component.layer
@@ -176,7 +176,7 @@ module SceneReaderModule
                 rotation = !haskey(component, "rotation") ? 0.0 : convert(Float64, component.rotation)
                 pixelsPerUnit = !haskey(component, "pixelsPerUnit") ? -1 : component.pixelsPerUnit
                 center = !haskey(component, "center") ? Vector2f(0.5,0.5) : Vector2f(component.center.x, component.center.y)
-                newComponent = Sprite(color::Vector3, crop::Union{Ptr{Nothing}, Math.Vector4}, component.isFlipped::Bool, component.imagePath::String, isWorldEntity::Bool, Int32(layer), offset::Vector2f, position::Vector2f, rotation::Float64, Int32(pixelsPerUnit), center::Vector2f)
+                newComponent = Sprite(color::Tuple{Int64, Int64, Int64, Int64}, crop::Union{Ptr{Nothing}, Math.Vector4}, component.isFlipped::Bool, component.imagePath::String, isWorldEntity::Bool, Int32(layer), offset::Vector2f, position::Vector2f, rotation::Float64, Int32(pixelsPerUnit), center::Vector2f)
             elseif component.type == "Shape"
                 color = !haskey(component, "color") || isempty(component.color) ? Vector3(255,255,255) : Vector3(component.color.x, component.color.y, component.color.z)
                 layer = !haskey(component, "layer") ? Int32(0) : Int32(component.layer)

@@ -24,3 +24,59 @@ function Base.setproperty!(editor::EditorExport{T}, sym::Symbol, new_value) wher
         editor.value = new_value  # Redirect updates to `value`
     end
 end 
+
+struct StatefulEnum{T}
+    states::Dict{Symbol,Union{T,Nothing}}
+    current_state::Symbol
+end
+
+function StatefulEnum{T}(pairs...) where T
+    states = Dict{Symbol,Union{T,Nothing}}()
+    for pair in pairs
+        if pair isa Pair  # If it's a key-value pair
+            states[pair.first] = pair.second
+        elseif pair isa Symbol  # If it's just a symbol, no value
+            states[pair] = nothing
+        else
+            error("Invalid entry: $pair. Must be Symbol or Pair{Symbol, T}")
+        end
+    end
+    return StatefulEnum{T}(states, first(keys(states)))
+end
+
+# Check if a state exists
+has_state(se::StatefulEnum, state::Symbol) = haskey(se.states, state)
+
+# Get value safely
+function get_value(se::StatefulEnum{T}, state::Symbol) where T
+    return get(se.states, state, nothing)
+end
+
+# Set value for a state
+function set_value!(se::StatefulEnum{T}, state::Symbol, value::T) where T
+    if haskey(se.states, state)
+        se.states[state] = value
+    else
+        error("State $state does not exist in the enum")
+    end
+end
+
+# Enable dot access (states.test)
+function Base.getproperty(se::StatefulEnum{T}, key::Symbol) where T
+    key === :states && return getfield(se, :states)  # Allow direct access to states field
+    key === :current_state && return getfield(se, :current_state)  # Allow direct access to current_state field
+    return get(se.states, key, nothing)  # Return state value (or nothing if not found)
+end
+
+# Enable dot assignment (states.test = "new_value")
+function Base.setproperty!(se::StatefulEnum{T}, key::Symbol, value) where T
+    if key === :states
+        setfield!(se, :states, value)  # Allow modifying states dictionary
+    elseif key === :current_state 
+        setfield!(se, :current_state, value)  # Allow modifying current_state
+    elseif haskey(se.states, key)
+        se.states[key] = value  # Modify existing state
+    else
+        error("State $key does not exist in this enum")
+    end
+end

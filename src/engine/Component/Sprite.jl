@@ -4,7 +4,7 @@ module SpriteModule
 
     export Sprite
     struct Sprite
-        color::Math.Vector3
+        color::Tuple{Int64, Int64, Int64, Int64}
         crop::Union{Ptr{Nothing}, Math.Vector4}
         isFlipped::Bool
         imagePath::String
@@ -20,7 +20,7 @@ module SpriteModule
     export InternalSprite
     mutable struct InternalSprite
         center::Math.Vector2f
-        color::Math.Vector3
+        color::Tuple{Int64, Int64, Int64, Int64}
         crop::Union{Ptr{Nothing}, Math.Vector4}
         isFlipped::Bool
         isFloatPrecision::Bool
@@ -36,7 +36,7 @@ module SpriteModule
         size::Math.Vector2
         texture::Union{Ptr{Nothing}, Ptr{SDL2.LibSDL2.SDL_Texture}}
         
-        function InternalSprite(parent::Any, imagePath::String, crop::Union{Ptr{Nothing}, Math.Vector4}=C_NULL, isFlipped::Bool=false, color::Math.Vector3 = Math.Vector3(255,255,255), isCreatedInEditor::Bool=false; pixelsPerUnit::Int32=Int32(-1), isWorldEntity::Bool=true, position::Math.Vector2f = Math.Vector2f(0,0), rotation::Float64 = 0.0, layer::Int32 = Int32(0), center::Math.Vector2f = Math.Vector2f(0.5,0.5))
+        function InternalSprite(parent::Any, imagePath::String, crop::Union{Ptr{Nothing}, Math.Vector4}=C_NULL, isFlipped::Bool=false, color::Tuple{Int64, Int64, Int64, Int64} = (255,255,255,255), isCreatedInEditor::Bool=false; pixelsPerUnit::Int32=Int32(-1), isWorldEntity::Bool=true, position::Math.Vector2f = Math.Vector2f(0,0), rotation::Float64 = 0.0, layer::Int32 = Int32(0), center::Math.Vector2f = Math.Vector2f(0.5,0.5))
             this = new()
 
             this.offset = Math.Vector2f()
@@ -90,8 +90,10 @@ module SpriteModule
     
         # Check and set color if necessary
         colorRefs = (Ref(UInt8(0)), Ref(UInt8(0)), Ref(UInt8(0)))
+        alphaRef = Ref(UInt8(0))
         SDL2.SDL_GetTextureColorMod(this.texture, colorRefs...)
-        if colorRefs[1] != this.color.x || colorRefs[2] != this.color.y || colorRefs[3] != this.color.z
+        SDL2.SDL_GetTextureAlphaMod(this.texture, alphaRef)
+        if colorRefs[1] != this.color[1] || colorRefs[2] != this.color[2] || colorRefs[3] != this.color[3] || this.color[4] != alphaRef
             Component.set_color(this)
         end
     
@@ -239,6 +241,7 @@ module SpriteModule
     end
 
     function Component.set_color(this::InternalSprite)
-        SDL2.SDL_SetTextureColorMod(this.texture, UInt8(this.color.x%256), UInt8(this.color.y%256), (this.color.z%256));
+        SDL2.SDL_SetTextureColorMod(this.texture, UInt8(this.color[1]%256), UInt8(this.color[2]%256), (this.color[3]%256));
+        SDL2.SDL_SetTextureAlphaMod(this.texture, UInt8(this.color[4]%256));
     end
 end
