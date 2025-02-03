@@ -402,10 +402,10 @@ function edit_color(label::String, color::NTuple{4, Int})
         CImGui.ColorEdit4(label, colorCfloat, CImGui.ImGuiColorEditFlags_DisplayRGB | misc_flags)
 
         if CImGui.IsItemEdited()
-            return (Int(round(colorCfloat[1] * 255)), 
-                    Int(round(colorCfloat[2] * 255)), 
-                    Int(round(colorCfloat[3] * 255)), 
-                    Int(round(colorCfloat[4] * 255)))
+            return (Int(abs(round(colorCfloat[1] * 255))), 
+                    Int(abs(round(colorCfloat[2] * 255))), 
+                    Int(abs(round(colorCfloat[3] * 255))), 
+                    Int(abs(round(colorCfloat[4] * 255))))
         end
     end
 
