@@ -45,6 +45,10 @@ module JulGame
     using .Math: Math
     export Math
 
+    include("engine/DataManagement/DataManagement.jl")
+    using .DataManagement: PrefHandlerModule
+    export PrefHandlerModule
+
     include("engine/Input/Input.jl")
     using .InputModule: Input
     export Input

@@ -93,14 +93,14 @@ module SceneBuilderModule
         end    
     end
     
-    function load_and_prepare_scene(main; this::Scene, config=parse_config(), globals = [])
+    function load_and_prepare_scene(main; this::Scene, config=parse_config(), windowName::String="Game", isWindowResizable::Bool=false, zoom::Float64=1.0, autoScaleZoom::Bool=true, globals = [])
         config = fill_in_config(config)
 
-        windowName::String = get(config, "WindowName", DEFAULT_CONFIG["WindowName"])
+        windowName::String = windowName
         size::Vector2 = Vector2(parse(Int32, get(config, "Width", DEFAULT_CONFIG["Width"])), parse(Int32, get(config, "Height", DEFAULT_CONFIG["Height"])))
-        isResizable::Bool = parse(Bool, get(config, "IsResizable", DEFAULT_CONFIG["IsResizable"]))
-        zoom::Float64 = parse(Float64, get(config, "Zoom", DEFAULT_CONFIG["Zoom"]))
-        autoScaleZoom::Bool = parse(Bool, get(config, "AutoScaleZoom", DEFAULT_CONFIG["AutoScaleZoom"]))
+        isResizable::Bool = isWindowResizable
+        zoom::Float64 = zoom
+        autoScaleZoom::Bool = autoScaleZoom
         targetFrameRate::Int32 = parse(Int32, get(config, "FrameRate", DEFAULT_CONFIG["FrameRate"]))
 
         if autoScaleZoom 
@@ -282,13 +282,13 @@ module SceneBuilderModule
 
     # Define default configuration values
     const DEFAULT_CONFIG = Dict(
-        "WindowName" => "Default Game",
+        #"WindowName" => "Default Game",
         "Width" => "800",
         "Height" => "600",
-        "PixelsPerUnit" => "16",
-        "IsResizable" => "0",
-        "Zoom" => "1.0",
-        "AutoScaleZoom" => "0",
+        #"PixelsPerUnit" => "16",
+        #"IsResizable" => "0",
+        #"Zoom" => "1.0",
+        #"AutoScaleZoom" => "0",
         "FrameRate" => "60",
         "Fullscreen" => "0"
     )
