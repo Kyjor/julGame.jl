@@ -21,7 +21,10 @@ function show_scene_window(main, scene_tex_id, scrolling, zoom_level, duplicatio
     draw_list = CImGui.GetWindowDrawList()
     
     CImGui.AddRectFilled(draw_list, canvas_p0, canvas_p1, IM_COL32(50, 50, 50, 255))
-    CImGui.AddImage(draw_list, scene_tex_id, canvas_p0, canvas_p1, ImVec2(0,0), ImVec2(1,1), IM_COL32(255,255,255,255))
+    try
+        CImGui.AddImage(draw_list, scene_tex_id, canvas_p0, canvas_p1, ImVec2(0,0), ImVec2(1,1), IM_COL32(255,255,255,255))
+    catch
+    end
     CImGui.AddRect(draw_list, canvas_p0, canvas_p1, IM_COL32(255, 255, 255, 255))
 
     # Draw border around actual image that is being edited TODO: Fix this
