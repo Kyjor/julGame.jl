@@ -12,6 +12,8 @@ module JulGame
     FONT_CACHE::Dict = Dict{String, Any}()
     AUDIO_CACHE::Dict = Dict{String, Any}()
 
+    ScriptModule = nothing
+
     include("ModuleExtensions/SDL2Extension.jl")
     const SDL2E = SDL2Extension
     export DELTA_TIME, IS_EDITOR, SDL2, SDL2E, MAIN

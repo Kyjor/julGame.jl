@@ -42,8 +42,8 @@ function mainFileContent(projectName)
         using JulGame
 
         function run()
-            scene = SceneBuilderModule.Scene(\"scene.json\")
-            SceneBuilderModule.load_and_prepare_scene(JulGame.MainLoop(Float64(1.0));this=scene)
+            JulGame.ScriptModule = @__MODULE__
+            SceneBuilderModule.load_and_prepare_scene(SceneBuilderModule.Scene(\"scene.json\"), JulGame.MainLoop())
         end
 
         julia_main() = run()

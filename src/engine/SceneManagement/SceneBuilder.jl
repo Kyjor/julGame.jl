@@ -35,11 +35,16 @@ module SceneBuilderModule
             @debug "Loaded test scripts"
         end
 
-        if isdir(joinpath(pwd(), "..", "scripts")) #dev builds
-            # println("Loading scripts...")
-            include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
-            @debug "Loaded scripts"
-        else
+        # if isdir(joinpath(pwd(), "..", "scripts")) #dev builds
+        #     @debug("Loading scripts...")
+        #     if JulGame.ScriptModule !== nothing
+        #         foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
+        #     else 
+        #         include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
+        #     end
+                
+        #     @debug "Loaded scripts"
+        if !isdir(joinpath(pwd(), "..", "scripts"))  
             script_folder_name = "scripts"
             current_dir = pwd()
             
@@ -51,12 +56,27 @@ module SceneBuilderModule
                 scripts_path = joinpath(current_dir, folder, script_folder_name)
                 if isdir(scripts_path)
                     @debug("Loading scripts in $scripts_path...")
-                    include.(filter(contains(r".jl$"), readdir(scripts_path; join=true)))
+                    #foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(scripts_path; join=true)))
+                    submodules = find_submodules()
+                    println("Submodules: ", submodules)
                     break  # Exit loop if "scripts" folder is found in any parent folder
                 end
             end
             @debug "Loaded scripts"
         end
+    end
+
+    function find_submodules(m::Module = Main, found = Set{Module}())
+        for name in names(m; all=true)
+            if isdefined(m, name)
+                obj = getfield(m, name)
+                if obj isa Module && obj !== Main  # Avoid including Main itself
+                    push!(found, obj)
+                    find_submodules(obj, found)  # Recursively search submodules
+                end
+            end
+        end
+        return found
     end
 
    function __init__()
@@ -229,7 +249,10 @@ module SceneBuilderModule
         @debug string("Path: ", path)
         @debug string("Entities: ", length(MAIN.scene.entities))
         if !JulGame.IS_PACKAGE_COMPILED
-            include.(filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
+            if JulGame.IS_EDITOR
+                JulGame.ScriptModule = Module(:Scripts)
+            end
+            foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
         end
 
         for entity in MAIN.scene.entities
@@ -243,7 +266,7 @@ module SceneBuilderModule
 
                 newScript = nothing
                 try
-                    module_name = Base.invokelatest(eval, Symbol("$(script.name)Module"))
+                    module_name = getfield(JulGame.ScriptModule, Symbol("$(script.name)Module"))
                     constructor = Base.invokelatest(getfield, module_name, Symbol(script.name)) 
                     newScript = Base.invokelatest(constructor)
                     scriptFields = get(script, "fields", Dict())

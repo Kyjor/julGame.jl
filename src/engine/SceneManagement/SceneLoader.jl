@@ -20,7 +20,7 @@ module SceneLoaderModule
         JulGame.BasePath = JulGame.BasePath == "" ? projectPath : JulGame.BasePath
         #println("Loading scene $sceneFileName from $projectPath")
         scene = Scene(sceneFileName, projectPath)
-        return SceneBuilderModule.load_and_prepare_scene(nothing; this=scene)
+        return SceneBuilderModule.load_and_prepare_scene(this=scene, nothing)
     end
     
     export load_scene_from_editor
@@ -49,7 +49,7 @@ module SceneLoaderModule
         @debug ("Loading scene $sceneFileName from $projectPath")
         scene = Scene("$sceneFileName", "$projectPath")
         
-        SceneBuilderModule.load_and_prepare_scene(JulGame.MainLoop(Float64(1.0)); this=scene)
+        SceneBuilderModule.load_and_prepare_scene(scene, JulGame.MainLoop(Float64(1.0)))
 
         return MAIN
     end
