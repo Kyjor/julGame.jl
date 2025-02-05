@@ -517,10 +517,6 @@ module Editor
                                 gameCamera = currentSceneMain.scene.camera
                                 cameraWindow.camera = gameCamera
                             end
-                            if currentSceneMain.scene.camera !== nothing
-                                gameCamera = currentSceneMain.scene.camera
-                            println("Camera position: $(gameCamera.position)")
-                            end
                             if JulGame.InputModule.get_button_held_down(currentSceneMain.input, "LCTRL") && JulGame.InputModule.get_button_pressed(currentSceneMain.input, "S")
                                 @debug string("Saving scene")
                                 events["Save"]()

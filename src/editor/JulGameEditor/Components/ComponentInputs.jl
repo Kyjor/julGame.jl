@@ -4,7 +4,7 @@ using CImGui.CSyntax.CStatic
 using JulGame
 using JulGame.Math
 using JulGame.UI
-
+using FileWatching
 #include("TextBoxFields.jl")
 #include("ScreenButtonFields.jl")
 
@@ -577,8 +577,8 @@ function show_script_editor(entity, newScriptText)
         
         script = display_files(joinpath(JulGame.BasePath, "scripts"), "scripts", "Add Script")
         if script != ""
-            include(joinpath(JulGame.BasePath, "scripts", "$(script).jl"))
-            module_name = Base.invokelatest(eval, Symbol("$(script)Module"))
+            Base.include(JulGame.ScriptModule, joinpath(JulGame.BasePath, "scripts", "$(script).jl"))
+            module_name = getfield(JulGame.ScriptModule, Symbol("$(script)Module"))
             constructor = Base.invokelatest(getfield, module_name, Symbol(script)) 
             newScript = Base.invokelatest(constructor)
             newScript.parent = entity
