@@ -1,5 +1,5 @@
-function show_game_window(scene_tex_id)
-    CImGui.Begin("Game") || (CImGui.End(); return)
+function show_game_window(scene_tex_id)::Tuple{ImVec2, ImVec2}
+    CImGui.Begin("Game") || (CImGui.End(); return ImVec2(0,0), ImVec2(0,0))
     draw_list = CImGui.GetWindowDrawList()
     
     # UI elements

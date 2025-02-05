@@ -1,6 +1,6 @@
-function show_scene_window(main, scene_tex_id, scrolling, zoom_level, duplicationMode, camera)
+function show_scene_window(main, scene_tex_id, scrolling, zoom_level, duplicationMode, camera)::ImVec2
   #  CImGui.SetNextWindowSize((350, 560), CImGui.ImGuiCond_FirstUseEver)
-    CImGui.Begin("Scene") || (CImGui.End(); return)
+    CImGui.Begin("Scene") || (CImGui.End(); return ImVec2(0,0))
     # GET SIZE OF SCENE TEXTURE
     # w, h = Ref{Int32}(0), Ref{Int32}(0)
     # SDL2.SDL_QueryTexture(scene_tex_id[], Ref{UInt32}(0), Ref{Int32}(0), w, h)

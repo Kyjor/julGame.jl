@@ -153,6 +153,7 @@ end
 
 function select_project_dialog(dialog, scenesLoadedFromFolder)
     CImGui.OpenPopup(dialog[])
+    result = ""
 
     if CImGui.BeginPopupModal(dialog[], C_NULL, CImGui.ImGuiWindowFlags_AlwaysAutoResize)
         CImGui.Text("Are you sure you would like to open another project?\nIf you currently have a project open, any unsaved changes will be lost.\n\n")
@@ -161,7 +162,7 @@ function select_project_dialog(dialog, scenesLoadedFromFolder)
             CImGui.CloseCurrentPopup()
             dialog[] = ""
 
-            return choose_project_filepath() |> (dir) -> (scenesLoadedFromFolder[] = get_all_scenes_from_folder(dir))
+            result = choose_project_filepath() |> (dir) -> (scenesLoadedFromFolder[] = get_all_scenes_from_folder(dir))
         end
         CImGui.SetItemDefaultFocus()
         CImGui.SameLine()
@@ -171,7 +172,7 @@ function select_project_dialog(dialog, scenesLoadedFromFolder)
         end
         CImGui.EndPopup()
     end
-    return ""
+    return result
 end
 
 function create_project_event(dialog)
@@ -507,6 +508,7 @@ end
 function confirmation_dialog(dialog)
     CImGui.OpenPopup(dialog[])
 
+    result = "continue"  # Default return value
     if CImGui.BeginPopupModal(dialog[], C_NULL, CImGui.ImGuiWindowFlags_AlwaysAutoResize)
         CImGui.Text("Are you sure you would like to open this scene?\nIf you currently have a scene open, any unsaved changes will be lost.\n\n")
         #CImGui.Separator()
@@ -522,7 +524,7 @@ function confirmation_dialog(dialog)
             CImGui.CloseCurrentPopup()
             dialog[] = ""
 
-            return "ok"
+            result = "ok"
         end
         CImGui.SetItemDefaultFocus()
         CImGui.SameLine()
@@ -530,10 +532,10 @@ function confirmation_dialog(dialog)
             CImGui.CloseCurrentPopup()
             dialog[] = ""
 
-            return "cancel"
+            result = "cancel"
         end
         CImGui.EndPopup()
 
-        return "continue"
+        return result    
     end
 end
