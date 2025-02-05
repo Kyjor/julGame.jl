@@ -12,7 +12,7 @@ module JulGame
     FONT_CACHE::Dict = Dict{String, Any}()
     AUDIO_CACHE::Dict = Dict{String, Any}()
 
-    ScriptModule = nothing
+    ScriptModule = Module(:Scripts)
 
     include("ModuleExtensions/SDL2Extension.jl")
     const SDL2E = SDL2Extension
