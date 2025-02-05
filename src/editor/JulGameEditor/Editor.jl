@@ -261,13 +261,16 @@ module Editor
                         end
                         
                         prevGameWindowSize = gameWindowSize
-                        gameWindowSize = show_game_window(gameTexture)
+                        gameWindowSize, gameWindowTopLeftCornerPosition = show_game_window(gameTexture)
 
                         if gameWindowSize === nothing
                             gameWindowSize = prevGameWindowSize
                         end
                         if sceneWindowSize === nothing
                             sceneWindowSize = prevSceneWindowSize
+                        end
+                        if gameWindowTopLeftCornerPosition !== nothing && currentSceneMain !== nothing
+                            currentSceneMain.input.mousePositionEditorGameWindowOffset = Math.Vector2(gameWindowTopLeftCornerPosition.x, gameWindowTopLeftCornerPosition.y)
                         end
                     catch e
                         handle_editor_exceptions("Show modal/scene window:", latest_exceptions, e, is_test_mode)

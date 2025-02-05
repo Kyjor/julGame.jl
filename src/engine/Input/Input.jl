@@ -17,6 +17,7 @@ module InputModule
         mouseButtonsHeldDown::Vector
         mouseButtonsReleased::Vector
         mousePosition
+        mousePositionEditorGameWindowOffset::Vector2
         mousePositionWorld
         joystick
         scanCodeStrings::Vector{String}
@@ -52,6 +53,7 @@ module InputModule
             this.mouseButtonsHeldDown = []
             this.mouseButtonsReleased = []
             this.mousePosition = Math.Vector2(0,0)
+            this.mousePositionEditorGameWindowOffset = Math.Vector2(0,0)
             this.mousePositionWorld = Math.Vector2(0,0)
             this.quit = false
             this.scanCodes = []
@@ -128,7 +130,7 @@ module InputModule
                     @debug("Mouse button down at $(this.mousePosition)")
                 end
 
-                if MAIN.scene.uiElements !== nothing
+                if MAIN.scene.uiElements !== nothing && !(JulGame.IS_EDITOR && !MAIN.isGameModeRunningInEditor)
                     if MAIN.scene.camera === nothing
                         @warn ("Camera is not set in the main scene.")
                         continue
@@ -141,13 +143,13 @@ module InputModule
                         end
                         # Check position of button to see which we are interacting with
                         eventWasInsideThisButton = true
-                        if this.mousePosition.x < uiElement.position.x + MAIN.scene.camera.startingCoordinates.x
+                        if this.mousePosition.x < (uiElement.position.x + MAIN.scene.camera.startingCoordinates.x + this.mousePositionEditorGameWindowOffset.x) * MAIN.zoom
                             eventWasInsideThisButton = false
-                        elseif this.mousePosition.x > MAIN.scene.camera.startingCoordinates.x + uiElement.position.x + uiElement.size.x * MAIN.zoom
+                        elseif this.mousePosition.x > (MAIN.scene.camera.startingCoordinates.x + uiElement.position.x + uiElement.size.x + this.mousePositionEditorGameWindowOffset.x) * MAIN.zoom
                             eventWasInsideThisButton = false
-                        elseif this.mousePosition.y < uiElement.position.y + MAIN.scene.camera.startingCoordinates.y
+                        elseif this.mousePosition.y < (uiElement.position.y + MAIN.scene.camera.startingCoordinates.y + this.mousePositionEditorGameWindowOffset.y) * MAIN.zoom 
                             eventWasInsideThisButton = false
-                        elseif this.mousePosition.y > MAIN.scene.camera.startingCoordinates.y + uiElement.position.y + uiElement.size.y * MAIN.zoom
+                        elseif this.mousePosition.y > (MAIN.scene.camera.startingCoordinates.y + uiElement.position.y + uiElement.size.y + this.mousePositionEditorGameWindowOffset.y) * MAIN.zoom 
                             eventWasInsideThisButton = false
                         end
 
@@ -524,5 +526,10 @@ module InputModule
 
         # Push the event to the event queue
         SDL2.SDL_PushEvent(key_event)
+    end
+
+    function set_cursor_with_image(this::Input, imagePath::String)
+        cursor = SDL2.SDL_CreateColorCursor(SDL2.SDL_LoadBMP(imagePath), 0, 0)
+        SDL2.SDL_SetCursor(cursor)
     end
 end # module InputModule
