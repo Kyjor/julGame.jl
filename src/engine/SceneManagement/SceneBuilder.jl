@@ -93,7 +93,7 @@ module SceneBuilderModule
         end    
     end
     
-    function load_and_prepare_scene(main; this::Scene, config=parse_config(), windowName::String="Game", isWindowResizable::Bool=false, zoom::Float64=1.0, autoScaleZoom::Bool=true, globals = [])
+    function load_and_prepare_scene(this::Scene, main; config=parse_config(), windowName::String="Game", isWindowResizable::Bool=false, zoom::Float64=1.0, autoScaleZoom::Bool=true, globals = [])
         config = fill_in_config(config)
 
         windowName::String = windowName
