@@ -612,11 +612,28 @@ module Editor
                                         println("reloading script: $(script_name)")
                                         module_name = getfield(JulGame.ScriptModule, Symbol("$(classname)Module"))
                                         constructor = Base.invokelatest(getfield, module_name, Symbol(script_name)) 
-                                        entity.scripts[i] = Base.invokelatest(constructor)
+                                        
+                                        new_script = Base.invokelatest(constructor)
+
+                                        # Copy all fields from old_script to the new script
+                                        for fieldname in fieldnames(typeof(entity.scripts[i]))
+                                            if fieldname != :parent  # Skip the `parent` field to avoid overwriting it
+                                                try
+                                                    if isdefined(entity.scripts[i], Symbol(fieldname))
+                                                        setfield!(new_script, fieldname, getfield(entity.scripts[i], fieldname))
+                                                    end
+                                                catch e
+                                                    println("issue with field: $(fieldname): $e")
+                                                end
+                                            end
+                                        end
+
+                                        entity.scripts[i] = new_script
                                         entity.scripts[i].parent = entity
                                         println("script reloaded successfully")
                                     catch e
-                                        @error "Error reloading script: $(script_name)"
+                                        @error "Error reloading script: $(script_name): $(first(string(e), 1000))"
+                                        Base.show_backtrace(stderr, catch_backtrace())
                                     end
                                 end
 
