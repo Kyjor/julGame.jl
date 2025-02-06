@@ -12,6 +12,8 @@ module JulGame
     FONT_CACHE::Dict = Dict{String, Any}()
     AUDIO_CACHE::Dict = Dict{String, Any}()
 
+    Coroutines::Vector = []
+
     ScriptModule = Module(:Scripts)
 
     include("ModuleExtensions/SDL2Extension.jl")
