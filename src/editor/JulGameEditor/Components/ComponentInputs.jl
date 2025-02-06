@@ -594,8 +594,8 @@ function show_script_editor(entity, newScriptText)
                 end
 
                 if CImGui.Button("Reload $scriptName:$(i)")
-                    include(joinpath(JulGame.BasePath, "scripts", "$(scriptName).jl"))
-                    module_name = Base.invokelatest(eval, Symbol("$(scriptName)Module"))
+                    Base.include(JulGame.ScriptModule, joinpath(JulGame.BasePath, "scripts", "$(scriptName).jl"))
+                    module_name = getfield(JulGame.ScriptModule, Symbol("$(scriptName)Module"))
                     constructor = Base.invokelatest(getfield, module_name, Symbol(scriptName)) 
                     entity.scripts[i] = Base.invokelatest(constructor)
                     entity.scripts[i].parent = entity

@@ -33,6 +33,11 @@ module Editor
         sceneTextureSize = ImVec2(startingSize.x, startingSize.y)
         gameTextureSize = ImVec2(200, 200)
 
+        ##coroutine
+        watch_task = nothing
+        condition = nothing 
+        filesToReload = Ref([])
+        
         style_imGui()
         showDemoWindow = false
         ##############################
@@ -88,7 +93,8 @@ module Editor
         currentProjectConfig = (Width=Ref(Int32(800)), Height=Ref(Int32(600)), FrameRate=Ref(Int32(30)), WindowName=Ref("Game"), PixelsPerUnit=Ref(Int32(16)), AutoScaleZoom=Ref(Bool(0)), IsResizable=Ref(Bool(0)), Fullscreen=Ref(Bool(0)))
 
         try
-            while !quit                    
+            while !quit                   
+                current_path = currentSelectedProjectPath[] 
                 try
                     if currentSceneMain === nothing
                         quit = poll_events()
@@ -581,6 +587,47 @@ module Editor
                     @error "Error in renderloop!" exception=e
                     Base.show_backtrace(stderr, catch_backtrace())
                 end
+
+                if current_path != currentSelectedProjectPath[]
+                    current_path = currentSelectedProjectPath[]
+                    condition = Condition()
+                    watch_task = @task poll_files(condition, current_path, filesToReload) # FileWatching.watch_folder(joinpath(currentSelectedProjectPath[], "scripts"), 0.1)
+                    schedule(watch_task)
+                    
+                elseif current_path !== nothing && current_path != "" && condition !== nothing && !istaskdone(watch_task)
+                    notify(condition)
+                    yield()
+                end
+
+                if length(filesToReload[]) > 0
+                    for file in filesToReload[]
+                        classname = split(file, ".")[begin]
+                        Base.include(JulGame.ScriptModule, joinpath(JulGame.BasePath, "scripts", file))
+                        for entity in currentSceneMain.scene.entities
+                            i = 1
+                            for script in entity.scripts
+                                script_name = split("$(typeof(script))", ".")[end]
+                                if script_name == classname
+                                    try 
+                                        println("reloading script: $(script_name)")
+                                        module_name = getfield(JulGame.ScriptModule, Symbol("$(classname)Module"))
+                                        constructor = Base.invokelatest(getfield, module_name, Symbol(script_name)) 
+                                        entity.scripts[i] = Base.invokelatest(constructor)
+                                        entity.scripts[i].parent = entity
+                                        println("script reloaded successfully")
+                                    catch e
+                                        @error "Error reloading script: $(script_name)"
+                                    end
+                                end
+
+                                i += 1
+                            end
+                        end
+
+                    end
+
+                    filesToReload[] = []
+                end
             end
         catch e
             backup_file_name = backup_file_name = "$(replace(currentSceneName, ".json" => ""))-backup-$(replace(Dates.format(Dates.now(), "yyyy-mm-ddTHH:MM:SS"), ":" => "-")).json"
@@ -599,6 +646,24 @@ module Editor
             SDL2.SDL_DestroyWindow(window);
             SDL2.SDL_Quit()
             return 0
+        end
+    end
+
+    function poll_files(condition, path, filesToReload)
+        index = false
+        while !index
+            try
+                watched = FileWatching.watch_folder(joinpath(path, "scripts"), 0.01) 
+                if watched.first != ""
+                    println("Updated $(watched.first), renamed: $(watched.second.renamed), changed: $(watched.second.changed), timedout: $(watched.second.timedout)")
+                    if watched.second.changed
+                        push!(filesToReload[], watched.first)
+                    end
+                end
+            catch e
+                println("Error: ", e)
+            end
+            wait(condition)
         end
     end
 
