@@ -22,6 +22,10 @@ module JulGame
 
     include("utils/Structs.jl")
     export EditorExport, StatefulEnum
+
+    include("Coroutine/Coroutine.jl")
+    using .CoroutineModule
+    export Coroutine
     
     include("utils/Types.jl")
     export Script

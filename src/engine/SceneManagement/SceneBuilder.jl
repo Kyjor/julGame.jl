@@ -305,13 +305,8 @@ module SceneBuilderModule
 
     # Define default configuration values
     const DEFAULT_CONFIG = Dict(
-        #"WindowName" => "Default Game",
         "Width" => "800",
         "Height" => "600",
-        #"PixelsPerUnit" => "16",
-        #"IsResizable" => "0",
-        #"Zoom" => "1.0",
-        #"AutoScaleZoom" => "0",
         "FrameRate" => "60",
         "Fullscreen" => "0"
     )

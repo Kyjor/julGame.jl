@@ -151,6 +151,22 @@ function select_project_event(currentSceneMain, scenesLoadedFromFolder, dialog)
     return event
 end
 
+function select_recent_project_event(currentSceneMain, scenesLoadedFromFolder, dialog)
+    event = @argevent (dir) begin
+        #if currentSceneMain === nothing  #TODO: Implement dialog for this case
+            if dir == "" 
+                return 
+            end 
+
+            scenesLoadedFromFolder[] = get_all_scenes_from_folder(string(dir))
+        # else
+        #     dialog[] = "Select Project"
+        # end
+    end
+
+    return event
+end
+
 function select_project_dialog(dialog, scenesLoadedFromFolder)
     CImGui.OpenPopup(dialog[])
     result = ""
@@ -350,14 +366,18 @@ function move_entities(entities, origin, destination)
 end
 
 function log_exceptions(error_type, latest_exceptions, e, top_backtrace, is_test_mode)
-    @error string(e)
-    Base.show_backtrace(stderr, catch_backtrace())
-    push!(latest_exceptions[], [e, String("$(Dates.now())"), top_backtrace])
-    if length(latest_exceptions[]) > 10
-        deleteat!(latest_exceptions[], 1)
-    end
-    if is_test_mode
-        @warn "Error in renderloop!" exception=e
+    Threads.@spawn begin
+        err_str = string(e)
+        truncated_err = length(err_str) > 1500 ? err_str[1:1500] * "..." : err_str
+        @error "Error occurred" exception=truncated_err
+        Base.show_backtrace(stderr, catch_backtrace())
+        push!(latest_exceptions[], [e, String("$(Dates.now())"), top_backtrace])
+        if length(latest_exceptions[]) > 20
+            deleteat!(latest_exceptions[], 1)
+        end
+        if is_test_mode
+            @warn "Error in renderloop!" exception=e
+        end
     end
 end
 

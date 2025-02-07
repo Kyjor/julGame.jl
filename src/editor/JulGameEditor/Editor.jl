@@ -92,6 +92,8 @@ module Editor
         cameraWindow = CameraWindow(true, gameCamera)
         currentProjectConfig = (Width=Ref(Int32(800)), Height=Ref(Int32(600)), FrameRate=Ref(Int32(30)), WindowName=Ref("Game"), PixelsPerUnit=Ref(Int32(16)), AutoScaleZoom=Ref(Bool(0)), IsResizable=Ref(Bool(0)), Fullscreen=Ref(Bool(0)))
 
+        recent_projects = parse_recents()
+
         try
             while !quit                   
                 current_path = currentSelectedProjectPath[] 
@@ -121,6 +123,7 @@ module Editor
                     end
                     events["New-project"] = create_project_event(currentDialog)
                     events["Select-project"] = select_project_event(currentSceneMain, scenesLoadedFromFolder, currentDialog)
+                    events["Select-recent-project"] = select_recent_project_event(currentSceneMain, scenesLoadedFromFolder, currentDialog)
                     events["Reset-camera"] = reset_camera_event(currentSceneMain)
                     events["Regenerate-ids"] = regenerate_ids_event(currentSceneMain)
                     events["New-Scene"] = @event begin
@@ -128,7 +131,7 @@ module Editor
                     end
                     events["Play-Mode"] = @event begin confirmation_modal.open = true; end
                     
-                    show_main_menu_bar(events, currentSceneMain)
+                    show_main_menu_bar(events, currentSceneMain, recent_projects)
                     ################################# END MAIN MENU BAR
                     if !isPackageCompiled
                         #@c CImGui.ShowDemoWindow(Ref{Bool}(showDemoWindow)) # Uncomment this line to show the demo window and see available widgets
@@ -589,6 +592,7 @@ module Editor
                 end
 
                 if current_path != currentSelectedProjectPath[]
+                    recent_projects = add_path_to_recents(currentSelectedProjectPath[])
                     current_path = currentSelectedProjectPath[]
                     condition = Condition()
                     watch_task = @task poll_files(condition, current_path, filesToReload) # FileWatching.watch_folder(joinpath(currentSelectedProjectPath[], "scripts"), 0.1)
@@ -802,5 +806,50 @@ module Editor
         Fullscreen = Ref(parse(Bool, config["Fullscreen"]))
 
         return (Width=Width, Height=Height, FrameRate=FrameRate, WindowName=WindowName, PixelsPerUnit=PixelsPerUnit, AutoScaleZoom=AutoScaleZoom, IsResizable=IsResizable, Fullscreen=Fullscreen)
+    end
+
+        # Function to read and parse the config file
+        function parse_recents()
+            try
+                filename = joinpath(JulGame.PrefHandlerModule.get_pref_path("kyjor", "julgame"), "recents.txt")
+                config = []
+                
+                if isfile(filename)
+                    # Open the file for reading
+                    open(filename, "r") do file
+                        for line in eachline(file)
+                            # Split the line at the '=' character
+                            push!(config, strip(line))
+                        end
+                    end
+                else 
+                    touch(filename)
+                end
+        
+                return config
+            catch e
+                rm(filename; force=tru)
+                touch(filename)
+            end
+        end
+
+    # Function to write values to the config file
+    function add_path_to_recents(path::String)
+        filename = joinpath(JulGame.PrefHandlerModule.get_pref_path("kyjor", "julgame"), "recents.txt")
+        try 
+            if !isfile(filename)
+                touch(filename)
+            end
+
+            # Append the new path to the file
+            open(filename, "a") do file
+                println(file, path)
+            end
+
+            return parse_recents()
+        catch e
+            rm(filename; force=tru)
+            touch(filename)
+        end
     end
 end # module

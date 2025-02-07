@@ -16,6 +16,8 @@ module PrefHandlerModule
     """
     function get_pref_path(org::String, app::String)
         path = SDL2.SDL_GetPrefPath(org, app)
+
+        @debug "pref path: $(path)"
         return unsafe_string(path)
     end
 end

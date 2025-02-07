@@ -77,9 +77,12 @@ module EntityModule
             try
                 Base.invokelatest(JulGame.update, script, deltaTime) 
             catch e
-                @error string(e)
-                Base.show_backtrace(stdout, catch_backtrace())
-                rethrow(e)
+                Threads.@spawn begin
+                    err_str = string(e)
+                    truncated_err = length(err_str) > 1500 ? err_str[1:1500] * "..." : err_str
+                    @error "Error occurred" exception=truncated_err
+                    Base.show_backtrace(stdout, catch_backtrace())
+                end
             end
         end
     end

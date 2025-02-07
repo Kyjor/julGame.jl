@@ -9,11 +9,11 @@ Create a fullscreen menu bar and populate it.
 # Arguments
 - `events`: An array of event functions. These are callbacks that are triggered when the user selects a menu item.
 """
-function show_main_menu_bar(events, main)
+function show_main_menu_bar(events, main, recent_paths::Vector)
     if CImGui.BeginMainMenuBar()
         @cstatic buf="File"*"\0"^128 begin
             if CImGui.BeginMenu(buf)
-                show_file_menu(events, main)
+                show_file_menu(events, main, recent_paths)
                 CImGui.EndMenu()
             end
         end
@@ -37,7 +37,7 @@ Show the file menu in the main menu bar.
 # Arguments
 - `events`: An array of event functions. These are callbacks that are triggered when the user selects a menu item.
 """
-function show_file_menu(events, main)
+function show_file_menu(events, main, recent_paths::Vector)
     if CImGui.MenuItem("New Project", "")
         events["New-project"]()
     end
@@ -46,6 +46,16 @@ function show_file_menu(events, main)
     end
     if main !== nothing && CImGui.MenuItem("New Scene", "")
         events["New-Scene"]()
+    end
+
+    # Recents submenu
+    if !isempty(recent_paths) && CImGui.BeginMenu("Recents")
+        for path in recent_paths
+            if CImGui.MenuItem(path)
+                events["Select-recent-project"](path)
+            end
+        end
+        CImGui.EndMenu()
     end
 end
 
