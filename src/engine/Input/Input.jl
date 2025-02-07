@@ -528,7 +528,7 @@ module InputModule
         SDL2.SDL_PushEvent(key_event)
     end
 
-    function set_cursor_with_image(this::Input, imagePath::String)
+    function set_cursor_with_image(imagePath::String)
         cursor = SDL2.SDL_CreateColorCursor(SDL2.SDL_LoadBMP(imagePath), 0, 0)
         SDL2.SDL_SetCursor(cursor)
     end

@@ -13,6 +13,7 @@ module MainLoopModule
 		assets::String
 		autoScaleZoom::Bool
 		close::Bool
+		coroutine_condition
 		currentTestTime::Float64
 		debugTextBoxes::Vector{UI.TextBoxModule.TextBox}
 		fpsManager::Ref{SDL2.LibSDL2.FPSmanager}
@@ -59,6 +60,7 @@ module MainLoopModule
 			this.currentTestTime = 0.0
 			this.testMode = false
 			this.testLength = 0.0
+			this.coroutine_condition = Condition()
 
 			return this
 		end
@@ -604,6 +606,22 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
                         JulGame.update(entityAnimator, currentRenderTime, deltaTime)
 					end
 				end
+			end
+
+			coroutines_to_remove = []
+			for coroutine in JulGame.Coroutines
+				if istaskdone(coroutine.task)
+					push!(coroutines_to_remove, coroutine)
+					continue
+				end
+
+				notify(coroutine.condition)
+				yield()
+			end
+
+			for coroutine_to_remove in coroutines_to_remove
+				@debug("coroutine done, removing")
+				deleteat!(JulGame.Coroutines, findfirst(x -> x == coroutine_to_remove, JulGame.Coroutines))
 			end
 			
 			if !JulGame.IS_EDITOR
