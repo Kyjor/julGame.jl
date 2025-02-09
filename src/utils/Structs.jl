@@ -25,35 +25,47 @@ function Base.setproperty!(editor::EditorExport{T}, sym::Symbol, new_value) wher
     end
 end 
 
-struct StatefulEnum{T}
+mutable struct Enum{T}
     states::Dict{Symbol,Union{T,Nothing}}
     current_state::Symbol
+    current_value::T
 end
 
-function StatefulEnum{T}(pairs...) where T
+function Enum{T}(pairs...) where T
     states = Dict{Symbol,Union{T,Nothing}}()
-    for pair in pairs
+    first_state = nothing  # Track the first state added
+
+    for (i, pair) in enumerate(pairs)
         if pair isa Pair  # If it's a key-value pair
             states[pair.first] = pair.second
-        elseif pair isa Symbol  # If it's just a symbol, no value
+        elseif pair isa Symbol  # If it's just a symbol, store as nothing
             states[pair] = nothing
         else
             error("Invalid entry: $pair. Must be Symbol or Pair{Symbol, T}")
         end
+
+        if i == 1  # Capture the first state added
+            first_state = pair isa Pair ? pair.first : pair
+        end
     end
-    return StatefulEnum{T}(states, first(keys(states)))
+
+    if first_state === nothing
+        error("StatefulEnum must have at least one state.")
+    end
+
+    return Enum{T}(states, first_state, states[first_state])
 end
 
 # Check if a state exists
-has_state(se::StatefulEnum, state::Symbol) = haskey(se.states, state)
+has_state(se::Enum, state::Symbol) = haskey(se.states, state)
 
 # Get value safely
-function get_value(se::StatefulEnum{T}, state::Symbol) where T
+function get_value(se::Enum{T}, state::Symbol) where T
     return get(se.states, state, nothing)
 end
 
 # Set value for a state
-function set_value!(se::StatefulEnum{T}, state::Symbol, value::T) where T
+function set_value!(se::Enum{T}, state::Symbol, value::T) where T
     if haskey(se.states, state)
         se.states[state] = value
     else
@@ -62,14 +74,15 @@ function set_value!(se::StatefulEnum{T}, state::Symbol, value::T) where T
 end
 
 # Enable dot access (states.test)
-function Base.getproperty(se::StatefulEnum{T}, key::Symbol) where T
+function Base.getproperty(se::Enum{T}, key::Symbol) where T
     key === :states && return getfield(se, :states)  # Allow direct access to states field
     key === :current_state && return getfield(se, :current_state)  # Allow direct access to current_state field
+    key === :current_value && return get(se.states, se.current_state, nothing)  # Fetch value of current state
     return get(se.states, key, nothing)  # Return state value (or nothing if not found)
 end
 
 # Enable dot assignment (states.test = "new_value")
-function Base.setproperty!(se::StatefulEnum{T}, key::Symbol, value) where T
+function Base.setproperty!(se::Enum{T}, key::Symbol, value) where T
     if key === :states
         setfield!(se, :states, value)  # Allow modifying states dictionary
     elseif key === :current_state 

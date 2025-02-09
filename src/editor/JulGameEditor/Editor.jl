@@ -649,6 +649,7 @@ module Editor
 
                     filesToReload[] = []
                 end
+                #println("loop")
             end
         catch e
             backup_file_name = backup_file_name = "$(replace(currentSceneName, ".json" => ""))-backup-$(replace(Dates.format(Dates.now(), "yyyy-mm-ddTHH:MM:SS"), ":" => "-")).json"
@@ -678,10 +679,14 @@ module Editor
                 if watched.first != ""
                     println("Updated $(watched.first), renamed: $(watched.second.renamed), changed: $(watched.second.changed), timedout: $(watched.second.timedout)")
                     if watched.second.changed
+                        println("pushing to files to reload")
                         push!(filesToReload[], watched.first)
+                        println("pushed to files to reload")
+
                     end
                 end
             catch e
+                wait(condition)
                 println("Error: ", e)
             end
             wait(condition)
@@ -841,15 +846,23 @@ module Editor
                 touch(filename)
             end
 
-            # Append the new path to the file
-            open(filename, "a") do file
-                println(file, path)
+            # Read existing entries
+            existing_paths = Set(readlines(filename))  # Use a Set for fast lookup
+
+            # Only add if not already in the file
+            if path ∉ existing_paths
+                open(filename, "a") do file
+                    println(file, path)
+                end
             end
 
             return parse_recents()
         catch e
-            rm(filename; force=tru)
+            rm(filename; force=true)
             touch(filename)
+            open(filename, "a") do file
+                println(file, path)
+            end
         end
     end
 end # module

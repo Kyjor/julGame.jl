@@ -366,19 +366,38 @@ function move_entities(entities, origin, destination)
 end
 
 function log_exceptions(error_type, latest_exceptions, e, top_backtrace, is_test_mode)
-    Threads.@spawn begin
+    #Threads.@spawn begin
         err_str = string(e)
-        truncated_err = length(err_str) > 1500 ? err_str[1:1500] * "..." : err_str
+        formatted_err = format_method_error(err_str)  # Format MethodError
+        truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
+        
         @error "Error occurred" exception=truncated_err
         Base.show_backtrace(stderr, catch_backtrace())
+
         push!(latest_exceptions[], [e, String("$(Dates.now())"), top_backtrace])
         if length(latest_exceptions[]) > 20
             deleteat!(latest_exceptions[], 1)
         end
         if is_test_mode
-            @warn "Error in renderloop!" exception=e
+            @warn "Error in renderloop!" exception=formatted_err
         end
+   # end
+end
+
+function format_method_error(error_msg::String)
+    # Match "MethodError(FUNCTION_NAME, (ARGUMENTS))"
+    if occursin(r"MethodError\((.+?), \((.+)\)\)", error_msg)
+        m = match(r"MethodError\((.+?), \((.+)\)\)", error_msg)
+        func_name = m[1]
+        args = m[2]
+
+        # Replace long argument details with "..."
+        args = replace(args, r"\(.+?\)" => "(...)")
+        args = replace(args, r"\[.+?\]" => "[...]")
+
+        return "MethodError($func_name, ($args))"
     end
+    return error_msg  # Return original if it doesn't match
 end
 
 function handle_drag_and_drop(filteredEntities, n, currentSceneMain, hierarchyEntitySelections)

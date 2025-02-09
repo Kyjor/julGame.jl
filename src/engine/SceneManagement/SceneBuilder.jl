@@ -249,9 +249,6 @@ module SceneBuilderModule
         @debug string("Path: ", path)
         @debug string("Entities: ", length(MAIN.scene.entities))
         if !JulGame.IS_PACKAGE_COMPILED
-            if JulGame.IS_EDITOR
-                JulGame.ScriptModule = Module(:Scripts)
-            end
             foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
         end
 

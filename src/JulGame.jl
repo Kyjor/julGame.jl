@@ -21,7 +21,7 @@ module JulGame
     export DELTA_TIME, IS_EDITOR, SDL2, SDL2E, MAIN
 
     include("utils/Structs.jl")
-    export EditorExport, StatefulEnum
+    export EditorExport, Enum
 
     include("Coroutine/Coroutine.jl")
     using .CoroutineModule

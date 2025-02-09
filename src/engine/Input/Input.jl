@@ -9,6 +9,7 @@ module InputModule
         buttonsHeldDown::Vector{String}
         buttonsReleased::Vector{String}
         debug::Bool
+        defaultCursor
         didMouseEventOccur::Bool
         editorCallback::Union{Function, Nothing}
         isWindowFocused::Bool
@@ -66,7 +67,7 @@ module InputModule
                 end
                 push!(this.scanCodes, [code, SubString(codeString, 14, length(codeString))])
             end
-
+            
             SDL2.SDL_Init(UInt64(SDL2.SDL_INIT_JOYSTICK))
             if SDL2.SDL_NumJoysticks() < 1
                 @debug("Warning: No joysticks connected!")
@@ -83,21 +84,22 @@ module InputModule
                 this.numAxes = SDL2.SDL_JoystickNumAxes(this.joystick)
                 this.numButtons = SDL2.SDL_JoystickNumButtons(this.joystick)
                 this.numHats = SDL2.SDL_JoystickNumHats(this.joystick)
-
+                
                 @debug("Now reading from joystick '$(unsafe_string(name))' with:")
                 @debug("$(this.numAxes) axes")
                 @debug("$(this.numButtons) buttons")
                 @debug("$(this.numHats) hats")
-
+                
             end
             this.jaxis = C_NULL
             this.xDir = 0
             this.yDir = 0
             this.button = 0
-
+            
             this.cursorBank = Dict{String, SDL2.SDL_SystemCursor}() 
             create_cursor_bank(this)
-
+            this.defaultCursor = this.cursorBank["arrow"]
+            
             this.isTestButtonClicked = false
 
             return this
@@ -160,14 +162,14 @@ module InputModule
                         insideAnyElement = true
 
                         if split("$(typeof(uiElement))", ".")[end] == "ScreenButton"
-                            SDL2.SDL_SetCursor(this.cursorBank["crosshair"])
+                            # SDL2.SDL_SetCursor(this.cursorBank["crosshair"])
                         end
                         
                         JulGame.UI.handle_event(uiElement, evt, this.mousePosition.x, this.mousePosition.y)
                     end
 
                     if !insideAnyElement
-                        SDL2.SDL_SetCursor(this.cursorBank["arrow"])
+                        # SDL2.SDL_SetCursor(this.defaultCursor)
                     end
                 end
 
@@ -528,8 +530,71 @@ module InputModule
         SDL2.SDL_PushEvent(key_event)
     end
 
-    function set_cursor_with_image(imagePath::String)
-        cursor = SDL2.SDL_CreateColorCursor(SDL2.SDL_LoadBMP(imagePath), 0, 0)
+    """
+        set_cursor_with_image(this, imagePath, x, y, scale_factor)
+
+        Loads an image as an SDL cursor, applies a scaling factor, and updates the hotspot position.
+
+        # Arguments
+        - `this::Input`: The input object storing the cursor reference.
+        - `imagePath::String`: Path to the image file.
+        - `x::Int, y::Int`: Original hotspot position in the image.
+        - `scale_factor::Float64`: Scaling factor for resizing the cursor (default = 1.0).
+
+        # Example
+        set_cursor_with_image(this, "cursor.png", 10, 10, 2.0)  # Scales up by 2x
+    """ 
+    function set_cursor_with_image(this::Input, imagePath::String, x::Int, y::Int, scale_factor::Float64=1.0)
+        surface = SDL2.IMG_Load(pointer(imagePath))
+        
+        if surface == C_NULL
+            @error "Failed to load cursor image: $(unsafe_string(SDL2.SDL_GetError()))"
+            return
+        end
+    
+        # Get original width and height
+        original_width = unsafe_load(surface).w
+        original_height = unsafe_load(surface).h
+    
+        # Calculate new dimensions
+        new_width = Int(round(original_width * scale_factor))
+        new_height = Int(round(original_height * scale_factor))
+    
+        # Scale the hotspot position
+        new_x = Int(round(x * scale_factor))
+        new_y = Int(round(y * scale_factor))
+    
+        # Create a new surface for the scaled image
+        scaled_surface = SDL2.SDL_CreateRGBSurface(0, new_width, new_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
+        
+        if scaled_surface == C_NULL
+            @error "Failed to create scaled surface: $(unsafe_string(SDL2.SDL_GetError()))"
+            SDL2.SDL_FreeSurface(surface)
+            return
+        end
+    
+        # Scale the image onto the new surface
+        SDL2.SDL_BlitScaled(surface, C_NULL, scaled_surface, C_NULL)
+    
+        # Create cursor from the scaled surface with adjusted hotspot
+        cursor = SDL2.SDL_CreateColorCursor(scaled_surface, new_x, new_y)
+    
+        if cursor != C_NULL
+            set_cursor(cursor)
+            this.defaultCursor = cursor
+            @info "Cursor set successfully! Scaled by $(scale_factor)x, Hotspot: ($new_x, $new_y)"
+        else
+            @error "Issue loading cursor: $(unsafe_string(SDL2.SDL_GetError()))"
+        end
+    
+        # Free surfaces to avoid memory leaks
+        SDL2.SDL_FreeSurface(surface)
+        SDL2.SDL_FreeSurface(scaled_surface)
+
+        return cursor
+    end
+
+    function set_cursor(cursor)
         SDL2.SDL_SetCursor(cursor)
     end
 end # module InputModule

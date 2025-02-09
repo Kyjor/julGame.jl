@@ -79,13 +79,74 @@ module EntityModule
             catch e
                 Threads.@spawn begin
                     err_str = string(e)
-                    truncated_err = length(err_str) > 1500 ? err_str[1:1500] * "..." : err_str
+                    formatted_err = format_method_error(err_str)  # Format MethodError
+                    truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
+                    
                     @error "Error occurred" exception=truncated_err
-                    Base.show_backtrace(stdout, catch_backtrace())
+                    Base.show_backtrace(stderr, catch_backtrace())
                 end
             end
         end
     end
+
+    function format_method_error(error_msg::String)
+        # Match "MethodError(FUNCTION_NAME, (ARGUMENTS))"
+        if occursin(r"MethodError\((.+?), \((.+)\)\)", error_msg)
+            m = match(r"MethodError\((.+?), \((.+)\)\)", error_msg)
+            func_name = m[1]
+            args = m[2]
+    
+            # Separate top-level arguments while tracking nested depth
+            depth = 0
+            simplified_args = String[]
+            current_arg = ""
+    
+            for char in args
+                if char == '(' || char == '['
+                    depth += 1
+                elseif char == ')' || char == ']'
+                    depth -= 1
+                end
+    
+                if char == ',' && depth == 0
+                    push!(simplified_args, strip(current_arg))
+                    current_arg = ""
+                else
+                    current_arg *= char
+                end
+            end
+            push!(simplified_args, strip(current_arg))  # Add last argument
+    
+            # Process each argument: keep type info, replace deep details with "(...)"
+            for i in 1:length(simplified_args)
+                arg = simplified_args[i]
+    
+                # Extract "Module.Type(...)" and replace details with "(...)"
+                if occursin(r"(\w+\.)+\w+\(", arg)
+                    simplified_args[i] = match(r"((\w+\.)+\w+)\(", arg)[1] * "(...)" 
+    
+                # Handle numbers: Convert to "Int" or "Float64"
+                elseif occursin(r"^\d+\.?\d*$", arg)
+                    try
+                        parsed_num = Meta.parse(arg)
+                        if isa(parsed_num, Integer)
+                            simplified_args[i] = "Int"
+                        elseif isa(parsed_num, AbstractFloat)
+                            simplified_args[i] = "Float64"
+                        end
+                    catch
+                        simplified_args[i] = "(...)"
+                    end
+                end
+            end
+    
+            return "MethodError($func_name, (" * join(simplified_args, ", ") * "))"
+        end
+        return error_msg  # Return original if no match
+    end
+    
+    
+    
 
     function JulGame.add_animator(this::Entity, animator::Animator = Animator(Animation[Animation(Vector4[Vector4(0,0,0,0)], Int32(60))]))
         if this.animator != C_NULL
