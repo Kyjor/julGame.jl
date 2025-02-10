@@ -36,12 +36,12 @@ module MainLoopModule
 		windowName::String
 		zoom::Float64
 
-		function MainLoop(zoom::Float64 = 1.0)
+		function MainLoop()
 			this::MainLoop = new()
 
 			SDL2.init()
 
-			this.zoom = zoom
+			this.zoom = 1.0
 			this.scene = SceneModule.Scene()
 			this.input = Input()
 

@@ -1,5 +1,5 @@
 module TitleModule
-    using ..JulGame
+    using JulGame
 
     mutable struct Title
         fade

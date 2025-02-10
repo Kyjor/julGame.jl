@@ -1,5 +1,5 @@
 module BackgroundModule
-    using ..JulGame
+    using JulGame
 
     mutable struct Background
         parent

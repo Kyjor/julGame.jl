@@ -5,7 +5,7 @@ module TestScriptModule
     #     end
     # end
     # conditional_using(:JulGame)
-    using ..JulGame
+    using JulGame
     using Test
     mutable struct TestScript
         parent

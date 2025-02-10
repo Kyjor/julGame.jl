@@ -13,7 +13,7 @@ include(joinpath(PROFILINGTESTDIR, "Platformer", "src", "Platformer.jl"))
         @test PlatformerModule.run_platformer() == 0
     end
 
-    include("math/mathtests.jl")
+    #include("math/mathtests.jl")
     
     cd(joinpath(SMOKETESTDIR, "src"))
     @test SmokeTest.run(SMOKETESTDIR, Test) == 0

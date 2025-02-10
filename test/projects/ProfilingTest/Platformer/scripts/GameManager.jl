@@ -1,5 +1,5 @@
 module GameManagerModule
-    using ..JulGame
+    using JulGame
 
     mutable struct GameManager
         currentLevel::Int32

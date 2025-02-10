@@ -1,5 +1,5 @@
 module SawModule
-    using ..JulGame
+    using JulGame
 
     mutable struct Saw
         animator::AnimatorModule.Animator

@@ -1,5 +1,5 @@
 module SpiderModule    
-    using ..JulGame
+    using JulGame
 
     mutable struct Spider
         animator

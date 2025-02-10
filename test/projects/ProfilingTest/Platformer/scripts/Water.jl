@@ -1,5 +1,5 @@
 module WaterModule
-    using ..JulGame
+    using JulGame
 
     mutable struct Water
         main

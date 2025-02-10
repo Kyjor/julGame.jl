@@ -1,5 +1,5 @@
 module FishModule
-    using ..JulGame
+    using JulGame
 
     mutable struct Fish
         animator

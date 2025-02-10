@@ -10,87 +10,6 @@ module SceneBuilderModule
     using ..SceneReaderModule
     using JSON3
 
-    function init()
-        # if end of path is "test", then we are running tests
-        if endswith(pwd(), "test")
-            println("Loading scripts in test folder...")
-        
-            # Define the paths to the directories
-            test_dir_1 = joinpath(pwd(), "projects", "ProfilingTest", "Platformer", "scripts")
-            test_dir_2 = joinpath(pwd(), "projects", "SmokeTest", "scripts")
-        
-            # Check if the directories exist before attempting to read them
-            if isdir(test_dir_1)
-                include.(filter(contains(r".jl$"), readdir(test_dir_1; join=true)))
-            else
-                println("Directory not found: $test_dir_1")
-            end
-        
-            if isdir(test_dir_2)
-                include.(filter(contains(r".jl$"), readdir(test_dir_2; join=true)))
-            else
-                println("Directory not found: $test_dir_2")
-            end
-        
-            @debug "Loaded test scripts"
-        end
-
-        # if isdir(joinpath(pwd(), "..", "scripts")) #dev builds
-        #     @debug("Loading scripts...")
-        #     if JulGame.ScriptModule !== nothing
-        #         foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
-        #     else 
-        #         include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
-        #     end
-                
-        #     @debug "Loaded scripts"
-        if !isdir(joinpath(pwd(), "..", "scripts"))  
-            script_folder_name = "scripts"
-            current_dir = pwd()
-            
-            # Find all folders in the current directory
-            folders = filter(isdir, readdir(current_dir))
-            
-            # Check each folder for the "scripts" subfolder
-            for folder in folders
-                scripts_path = joinpath(current_dir, folder, script_folder_name)
-                if isdir(scripts_path)
-                    @debug("Loading scripts in $scripts_path...")
-                    #foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(scripts_path; join=true)))
-                    submodules = find_submodules()
-                    println("Submodules: ", submodules)
-                    break  # Exit loop if "scripts" folder is found in any parent folder
-                end
-            end
-            @debug "Loaded scripts"
-        end
-    end
-
-    function find_submodules(m::Module = Main, found = Set{Module}())
-        for name in names(m; all=true)
-            if isdefined(m, name)
-                obj = getfield(m, name)
-                if obj isa Module && obj !== Main  # Avoid including Main itself
-                    push!(found, obj)
-                    find_submodules(obj, found)  # Recursively search submodules
-                end
-            end
-        end
-        return found
-    end
-
-   function __init__()
-    # if not using PackageCompiler, then we need to call init() here
-        if ccall(:jl_generating_output, Cint, ()) != 1
-            init()
-        end
-    end
-
-    # if using PackageCompiler, then we need to call init here
-    if ccall(:jl_generating_output, Cint, ()) == 1
-        init()
-    end
-        
     export Scene
     mutable struct Scene
         scene
@@ -113,7 +32,7 @@ module SceneBuilderModule
         end    
     end
     
-    function load_and_prepare_scene(this::Scene, main; config=parse_config(), windowName::String="Game", isWindowResizable::Bool=false, zoom::Float64=1.0, autoScaleZoom::Bool=true, globals = [])
+    function load_and_prepare_scene(this::Scene, main; config=parse_config(), windowName::String="Game", isWindowResizable::Bool=false, zoom::Float64=1.0, autoScaleZoom::Bool=false, globals = [])
         config = fill_in_config(config)
 
         windowName::String = windowName

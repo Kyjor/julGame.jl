@@ -1,7 +1,7 @@
 module PlatformerModule
     using JulGame
     function run_platformer()
-        JulGame.MAIN = JulGame.MainLoop(Float64(1.0))
+        JulGame.MAIN = JulGame.MainLoop()
         MAIN.testMode = true
         MAIN.testLength = 30.0
         MAIN.currentTestTime = 0.0
