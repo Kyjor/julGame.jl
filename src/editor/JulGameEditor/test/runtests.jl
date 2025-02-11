@@ -1,3 +1,15 @@
+using Test
+
+ROOTDIR = joinpath(@__DIR__, "..")
+
+@testset "All editor tests" begin
+    cd(joinpath(ROOTDIR, "src"))
+    include(joinpath(ROOTDIR, "Editor.jl"))
+    @testset "Editor" begin
+        @test Editor.run(true) == 0
+    end
+end
+
 # Functionalities to test in the editor module
 
 # 1. Load a scene from the specified `scenePath` using the SceneLoaderModule.
