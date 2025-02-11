@@ -49,7 +49,7 @@ module SceneLoaderModule
         @debug ("Loading scene $sceneFileName from $projectPath")
         scene = Scene("$sceneFileName", "$projectPath")
         
-        SceneBuilderModule.load_and_prepare_scene(scene, JulGame.MainLoop(Float64(1.0)))
+        SceneBuilderModule.load_and_prepare_scene(scene, JulGame.MainLoop())
 
         return MAIN
     end

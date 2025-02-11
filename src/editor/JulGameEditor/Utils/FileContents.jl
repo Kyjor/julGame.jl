@@ -114,13 +114,8 @@ end
 
 function config_file_content(projectName)
     return
-    "WindowName=$projectName
-Width=800
-Height=800
-PixelsPerUnit=16
-IsResizable=1
-Zoom=1.0
-AutoScaleZoom=0
-Fullscreen=0
-FrameRate=60"
+    "Width=800
+    Height=800
+    Fullscreen=0
+    FrameRate=60"
 end

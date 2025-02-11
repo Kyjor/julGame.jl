@@ -16,6 +16,7 @@ module ScreenButtonModule
         buttonUpSpritePath::String
         buttonUpTexture
         fontPath::Union{String, Ptr{Nothing}}
+        id::String
         isActive::Bool
         isHovered::Bool
         isInitialized::Bool
@@ -28,7 +29,7 @@ module ScreenButtonModule
         textSize::Math.Vector2
         textTexture
 
-        function ScreenButton(name::String, buttonUpSpritePath::String, buttonDownSpritePath::String, size::Math.Vector2, position::Math.Vector2, fontPath::Union{String, Ptr{Nothing}} = C_NULL, text::String="", textOffset::Math.Vector2=Math.Vector2(0,0))
+        function ScreenButton(name::String, buttonUpSpritePath::String, buttonDownSpritePath::String, size::Math.Vector2, position::Math.Vector2, fontPath::Union{String, Ptr{Nothing}} = C_NULL, text::String="", textOffset::Math.Vector2=Math.Vector2(0,0); id::String=JulGame.generate_uuid())
             this = new()
             
             this.buttonDownSpritePath = buttonDownSpritePath
@@ -37,6 +38,7 @@ module ScreenButtonModule
             this.buttonUpSprite = load_image_sdl(joinpath(JulGame.BasePath, "assets", "images"), buttonUpSpritePath)
             this.clickEvents = []
             this.currentTexture = C_NULL
+            this.id = id
             this.size = size
             this.fontPath = fontPath
             this.name = name

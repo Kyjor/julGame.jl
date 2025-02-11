@@ -8,7 +8,6 @@ module CameraModule
         offset::Vector2f
         position::Vector2f
         size::Vector2
-        startingCoordinates::Vector2f
 
         target::Union{
             Ptr{Nothing}, 
@@ -24,7 +23,6 @@ module CameraModule
             this.position = initialPosition
             this.offset = Vector2f(offset.x, offset.y)
             this.target = target
-            this.startingCoordinates = Vector2f()                                                                                                                                                                                                           
             this.windowPos = Vector2(0,0)
 
             return this
