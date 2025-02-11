@@ -32,15 +32,55 @@ jobs:
       - uses: actions/checkout@v2
       - run: sudo apt-get install xvfb && Xvfb :99 &
         if: matrix.os == 'ubuntu-latest'
+
+      - name: Install PulseAudio on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pulseaudio
+          pulseaudio --check || pulseaudio --start
+          pactl load-module module-null-sink sink_name=vspeaker sink_properties=device.description=virtual_speaker
+          pactl load-module module-remap-source master=vspeaker.monitor source_name=vmic source_properties=device.description=virtual_mic
+      - name: Install BlackHole on macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install blackhole-2ch
+      - name: Install Scream on Windows
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          Invoke-WebRequest https://github.com/duncanthrax/scream/releases/download/4.0/Scream4.0.zip -OutFile Scream4.0.zip
+          Expand-Archive -Path Scream4.0.zip -DestinationPath Scream
+          openssl req -batch -verbose -x509 -newkey rsa -keyout ScreamCertificate.pvk -out ScreamCertificate.cer -nodes -extensions v3_req
+          openssl pkcs12 -export -nodes -in ScreamCertificate.cer -inkey ScreamCertificate.pvk -out ScreamCertificate.pfx -passout pass:
+      - name: Setup MSVC Dev Cmd
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Sign and Install Scream Driver on Windows
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          signtool sign /v /fd SHA256 /f ScreamCertificate.pfx Scream\Install\driver\x64\Scream.cat
+          Import-Certificate -FilePath ScreamCertificate.cer -CertStoreLocation Cert:\LocalMachine\root
+          Import-Certificate -FilePath ScreamCertificate.cer -CertStoreLocation Cert:\LocalMachine\TrustedPublisher
+          Scream\Install\helpers\devcon-x64.exe install Scream\Install\driver\x64\Scream.inf *Scream
+        timeout-minutes: 5
+
+      - name: Start Windows Audio Service
+        if: matrix.os == 'windows-latest'
+        run: net start audiosrv
+        shell: powershell
+
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1
         with:
-          working-directory: ./src/editor/
+          working-directory: ./src/editor/JulGameEditor
+      - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v4-beta
         env:
