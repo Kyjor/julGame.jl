@@ -67,14 +67,14 @@ module MainLoopModule
 
     function prepare_window_scripts_and_start_loop(size)
         @debug "Preparing window"
-		if !JulGame.IS_EDITOR
+		if !JulGame.IS_EDITOR && !JulGame.IS_WEB
 			@debug "Preparing window for game"
             prepare_window(size)
         end
 		@debug "Initializing scripts and components"
         initialize_scripts_and_components()
 
-        if !JulGame.IS_EDITOR
+        if !JulGame.IS_EDITOR && !JulGame.IS_WEB
 			@debug "Starting non editor loop"
             full_loop(MAIN)
             return
@@ -481,7 +481,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 
 			DEBUG = false
 			#region Input
-			if !JulGame.IS_EDITOR
+			if !JulGame.IS_EDITOR && !JulGame.IS_WEB
 				JulGame.InputModule.poll_input(this.input)
 
 				this.close = this.input.quit
@@ -535,7 +535,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 
 			#region Rendering
 			currentRenderTime = SDL2.SDL_GetTicks()
-			if this.scene.camera !== nothing && !JulGame.IS_EDITOR
+			if this.scene.camera !== nothing && !JulGame.IS_EDITOR && !JulGame.IS_WEB
 				JulGame.CameraModule.update(this.scene.camera)
 			end
 
@@ -583,7 +583,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 				deleteat!(JulGame.Coroutines, findfirst(x -> x == coroutine_to_remove, JulGame.Coroutines))
 			end
 			
-			if !JulGame.IS_EDITOR
+			if !JulGame.IS_EDITOR && !JulGame.IS_WEB
 				render_scene_sprites_and_shapes(this, this.scene.camera)
 			end
 			
@@ -624,9 +624,22 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 				 end
 			end
 
-			if !JulGame.IS_EDITOR
+			if !JulGame.IS_EDITOR && !JulGame.IS_WEB
 				SDL2.SDL_RenderPresent(JulGame.Renderer::Ptr{SDL2.SDL_Renderer})
 				SDL2.SDL_framerateDelay(this.fpsManager)
+			elseif JulGame.IS_WEB
+				entt = "["
+				for i = 1:length(this.scene.entities)
+					entt *= "{ \"x\": $(this.scene.entities[i].transform.position.x), \"y\": $(this.scene.entities[i].transform.position.y) }"
+
+					if i < length(this.scene.entities)
+						entt *= ","
+					end
+				end
+
+				entt *= "]"
+
+				return entt
 			end
 		catch e
 			if JulGame.IS_EDITOR || this.testMode

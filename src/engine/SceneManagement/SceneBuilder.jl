@@ -14,12 +14,14 @@ module SceneBuilderModule
     mutable struct Scene
         scene
         srcPath::String
-        function Scene(sceneFileName::String, srcPath::String = joinpath(pwd(), ".."))
+        type::String
+
+        function Scene(sceneFileName::String, srcPath::String = joinpath(pwd(), ".."), type::String="SDLRenderer")
             this = new()  
 
             this.scene = sceneFileName
             this.srcPath = srcPath 
-
+            this.type = type
             path = Base.load_path()[1]
             JulGame.IS_PACKAGE_COMPILED = occursin("share", path) && occursin("Project.toml", path)
             if Sys.isapple() && JulGame.IS_PACKAGE_COMPILED
@@ -27,6 +29,9 @@ module SceneBuilderModule
             end
 
             JulGame.BasePath = srcPath
+            if type == "Web"
+                JulGame.IS_WEB = true
+            end
 
             return this
         end    
@@ -60,7 +65,8 @@ module SceneBuilderModule
         (get(config, "Fullscreen", DEFAULT_CONFIG["Fullscreen"]) == "1" ? SDL2.SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
 
         MAIN.screenSize = size
-        if !JulGame.IS_EDITOR
+        
+        if !JulGame.IS_EDITOR && this.type != "Web"
             MAIN.window = SDL2.SDL_CreateWindow(MAIN.windowName, SDL2.SDL_WINDOWPOS_CENTERED, SDL2.SDL_WINDOWPOS_CENTERED, MAIN.screenSize.x, MAIN.screenSize.y, flags)
             JulGame.Renderer::Ptr{SDL2.SDL_Renderer} = SDL2.SDL_CreateRenderer(MAIN.window, -1, SDL2.SDL_RENDERER_ACCELERATED)
         end
@@ -76,7 +82,7 @@ module SceneBuilderModule
         if size.y < MAIN.scene.camera.size.y && size.y > 0
             MAIN.scene.camera.size = Vector2(MAIN.scene.camera.size.x, size.y)
         end
-        if !JulGame.IS_EDITOR
+        if !JulGame.IS_EDITOR && this.type != "Web"
             SDL2.SDL_RenderSetLogicalSize(JulGame.Renderer, MAIN.scene.camera.size.x, MAIN.scene.camera.size.y)
         end
         
@@ -95,6 +101,7 @@ module SceneBuilderModule
     end
 
     function deserialize_and_build_scene(this::Scene)
+        
         scene = deserialize_scene(joinpath(BasePath, "scenes", this.scene))
         
         @debug String("Changing scene to $(this.scene)")

@@ -375,6 +375,10 @@ end
         end
     end
 
+    function update_input_state(this::Input, data::Dict{String, Any})
+        this.buttonsHeldDown = [key for (key, value) in data if value]        
+    end
+
     function get_button_held_down(this::Input, button::String)
         if uppercase(button) in this.buttonsHeldDown
             return true
