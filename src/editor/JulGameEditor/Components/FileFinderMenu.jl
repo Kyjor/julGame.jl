@@ -31,10 +31,12 @@ function display_files(base_path::String, file_type::String, title::String = "",
                 extension = ".$(split(file, ".")[end])"
                 if extension in extensions
                     if CImGui.MenuItem(file)
+                        println("selected: $(file)")
                         value = "$(joinpath(base_path, file))"
                         if file_type == "scripts"
                             value = split(file, ".")[1]
                         end
+                        break
                     end
                 end
             end

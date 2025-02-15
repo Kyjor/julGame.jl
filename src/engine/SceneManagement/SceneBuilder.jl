@@ -177,7 +177,11 @@ module SceneBuilderModule
         @debug string("Path: ", path)
         @debug string("Entities: ", length(MAIN.scene.entities))
         if !JulGame.IS_PACKAGE_COMPILED
-            foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
+            foreach(file -> try
+                Base.include(JulGame.ScriptModule, file)
+            catch e
+                println("Error including $file: ", e)
+            end, filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
         end
 
         for entity in MAIN.scene.entities
