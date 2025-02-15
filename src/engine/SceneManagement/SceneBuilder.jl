@@ -66,7 +66,7 @@ module SceneBuilderModule
 
         MAIN.screenSize = size
         
-        if !JulGame.IS_EDITOR && this.type != "Web"
+        if !JulGame.IS_EDITOR && !JulGame.IS_WEB
             MAIN.window = SDL2.SDL_CreateWindow(MAIN.windowName, SDL2.SDL_WINDOWPOS_CENTERED, SDL2.SDL_WINDOWPOS_CENTERED, MAIN.screenSize.x, MAIN.screenSize.y, flags)
             JulGame.Renderer::Ptr{SDL2.SDL_Renderer} = SDL2.SDL_CreateRenderer(MAIN.window, -1, SDL2.SDL_RENDERER_ACCELERATED)
         end
@@ -82,7 +82,7 @@ module SceneBuilderModule
         if size.y < MAIN.scene.camera.size.y && size.y > 0
             MAIN.scene.camera.size = Vector2(MAIN.scene.camera.size.x, size.y)
         end
-        if !JulGame.IS_EDITOR && this.type != "Web"
+        if !JulGame.IS_EDITOR && !JulGame.IS_WEB
             SDL2.SDL_RenderSetLogicalSize(JulGame.Renderer, MAIN.scene.camera.size.x, MAIN.scene.camera.size.y)
         end
         

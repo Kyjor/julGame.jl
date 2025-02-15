@@ -3,7 +3,7 @@ module JulGame
     using SimpleDirectMediaLayer
     const SDL2 = SimpleDirectMediaLayer
     MAIN = nothing
-    IS_WEB = true
+    IS_WEB = false
     IS_EDITOR::Bool = false
     IS_DEBUG::Bool = false
     IS_PACKAGE_COMPILED::Bool = false
