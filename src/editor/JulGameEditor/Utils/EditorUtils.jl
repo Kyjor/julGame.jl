@@ -527,6 +527,9 @@ function regenerate_ids_event(main)
         for index in eachindex(main.scene.entities)
             main.scene.entities[index].id = JulGame.generate_uuid()
         end
+        for index in eachindex(main.scene.uiElements)
+            main.scene.uiElements[index].id = JulGame.generate_uuid()
+        end
     end
 
     return event

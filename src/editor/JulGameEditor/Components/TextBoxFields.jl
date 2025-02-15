@@ -39,7 +39,7 @@ function show_textbox_fields(selectedTextBox, textBoxField)
         if x != Value.r || y != Value.g || z != Value.b || w != Value.a
             selectedTextBox.text = selectedTextBox.text
         end
-    elseif fieldName == "position"
+    elseif fieldName == "position" || fieldName == "anchorOffset"
         x = Cint(Value.x)
         y = Cint(Value.y)
         @c CImGui.InputInt("$(textBoxField) x", &x, 1)

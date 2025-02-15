@@ -66,7 +66,6 @@ module Editor
 
         scrolling = Ref(ImVec2(0.0, 0.0))
         zoom_level = Ref(1.0)
-        playMode = false
 
         animation_window_dict = Ref(Dict())
         animator_preview_dict = Ref(Dict())
@@ -174,7 +173,7 @@ module Editor
                     end
                     
                     try 
-                        if !playMode && currentSelectedProjectPath[] != "" && unsafe_string(SDL2.SDL_GetWindowTitle(window)) != "$(windowTitle) - $(currentSelectedProjectPath[])"
+                        if !JulGame.IS_EDITOR_PLAY_MODE && currentSelectedProjectPath[] != "" && unsafe_string(SDL2.SDL_GetWindowTitle(window)) != "$(windowTitle) - $(currentSelectedProjectPath[])"
                             newWindowTitle = "$(windowTitle) - $(currentSelectedProjectPath[])"
                             SDL2.SDL_SetWindowTitle(window, newWindowTitle)
                         end
@@ -247,10 +246,10 @@ module Editor
                     try
                         prevSceneWindowSize = sceneWindowSize
                         
-                        wasPlaying = playMode
+                        wasPlaying = JulGame.IS_EDITOR_PLAY_MODE
                         if show_modal(confirmation_modal)
-                            playMode = !playMode
-                            if playMode
+                            JulGame.IS_EDITOR_PLAY_MODE = !JulGame.IS_EDITOR_PLAY_MODE
+                            if JulGame.IS_EDITOR_PLAY_MODE
                                 startTime[] = SDL2.SDL_GetTicks()
                                  
                                 # Animate the text in the window title
@@ -259,11 +258,11 @@ module Editor
                         end
                         
                         sceneWindowSize = show_scene_window(currentSceneMain, sceneTexture, scrolling, zoom_level, duplicationMode, camera)
-                        if playMode != wasPlaying && currentSceneMain !== nothing
-                            if playMode
+                        if JulGame.IS_EDITOR_PLAY_MODE != wasPlaying && currentSceneMain !== nothing
+                            if JulGame.IS_EDITOR_PLAY_MODE
                                 JulGame.MainLoopModule.start_game_in_editor(currentSceneMain, currentSelectedProjectPath[])
                                 currentSceneMain.scene.camera = gameCamera 
-                            elseif !playMode
+                            elseif !JulGame.IS_EDITOR_PLAY_MODE
                                 JulGame.MainLoopModule.stop_game_in_editor(currentSceneMain)
                                 JulGame.change_scene(String(currentSceneName))
                             end
@@ -606,18 +605,30 @@ module Editor
                 if length(filesToReload[]) > 0
                     for file in filesToReload[]
                         classname = split(file, ".")[begin]
-                        Base.include(JulGame.ScriptModule, joinpath(JulGame.BasePath, "scripts", file))
+                        try
+                            Base.include(JulGame.ScriptModule, joinpath(JulGame.BasePath, "scripts", file))
+                        catch e
+                            @error "Error reloading file: $(file)"
+                            continue
+                        end
                         for entity in currentSceneMain.scene.entities
                             i = 1
                             for script in entity.scripts
                                 script_name = split("$(typeof(script))", ".")[end]
                                 if script_name == classname
                                     try 
-                                        println("reloading script: $(script_name)")
+                                        @debug("reloading script: $(script_name)")
                                         module_name = getfield(JulGame.ScriptModule, Symbol("$(classname)Module"))
                                         constructor = Base.invokelatest(getfield, module_name, Symbol(script_name)) 
                                         
                                         new_script = Base.invokelatest(constructor)
+                                        entity.scripts[i] = new_script
+                                        entity.scripts[i].parent = entity
+                                        
+                                        # TODO: Get this working
+                                        # if JulGame.IS_EDITOR_PLAY_MODE
+                                        #     JulGame.initialize(new_script)
+                                        # end
 
                                         # Copy all fields from old_script to the new script
                                         for fieldname in fieldnames(typeof(entity.scripts[i]))
@@ -632,8 +643,6 @@ module Editor
                                             end
                                         end
 
-                                        entity.scripts[i] = new_script
-                                        entity.scripts[i].parent = entity
                                         println("script reloaded successfully")
                                     catch e
                                         @error "Error reloading script: $(script_name): $(first(string(e), 1000))"
@@ -655,8 +664,8 @@ module Editor
             backup_file_name = backup_file_name = "$(replace(currentSceneName, ".json" => ""))-backup-$(replace(Dates.format(Dates.now(), "yyyy-mm-ddTHH:MM:SS"), ":" => "-")).json"
             @debug string("Backup file name: ", backup_file_name)
             SceneWriterModule.serialize_entities(currentSceneMain.scene.entities, currentSceneMain.scene.uiElements, gameCamera, currentSelectedProjectPath[], backup_file_name)
+            @error "Error in renderloop!" exception=e
             Base.show_backtrace(stderr, catch_backtrace())
-            @warn "Error in renderloop!" exception=e
         finally
             #TODO: fix these: ImGui_ImplSDLRenderer2_Shutdown();
             # ImGui_ImplSDL2_Shutdown();

@@ -122,6 +122,8 @@ module SceneReaderModule
                 if uiElement.type == "TextBox"
                     newUIElement = TextBox(uiElement.name, uiElement.fontPath, uiElement.fontSize, Vector2(uiElement.position.x, uiElement.position.y), get(uiElement, "text", " "), uiElement.isCenteredX, uiElement.isCenteredY)    
                     newUIElement.isWorldEntity = uiElement.isWorldEntity    
+                    newUIElement.anchorOffset = !haskey(uiElement, "anchorOffset") ? Vector2(0,0) : Vector2(uiElement.anchorOffset.x, uiElement.anchorOffset.y)
+                    newUIElement.id = string(get(uiElement, "id", newUIElement.id))
                     isActive::Bool = !haskey(uiElement, "isActive") ? true : uiElement.isActive
                     newUIElement.isActive = isActive    
                 else

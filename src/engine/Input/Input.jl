@@ -145,15 +145,34 @@ module InputModule
                         end
                         # Check position of button to see which we are interacting with
                         eventWasInsideThisButton = true
-                        if this.mousePosition.x < (uiElement.position.x + MAIN.scene.camera.startingCoordinates.x + this.mousePositionEditorGameWindowOffset.x) * MAIN.zoom
-                            eventWasInsideThisButton = false
-                        elseif this.mousePosition.x > (MAIN.scene.camera.startingCoordinates.x + uiElement.position.x + uiElement.size.x + this.mousePositionEditorGameWindowOffset.x) * MAIN.zoom
-                            eventWasInsideThisButton = false
-                        elseif this.mousePosition.y < (uiElement.position.y + MAIN.scene.camera.startingCoordinates.y + this.mousePositionEditorGameWindowOffset.y) * MAIN.zoom 
-                            eventWasInsideThisButton = false
-                        elseif this.mousePosition.y > (MAIN.scene.camera.startingCoordinates.y + uiElement.position.y + uiElement.size.y + this.mousePositionEditorGameWindowOffset.y) * MAIN.zoom 
-                            eventWasInsideThisButton = false
-                        end
+# Assuming:
+# - windowWidth and windowHeight are the physical dimensions of the window
+windowWidth = 1280  # Replace with actual window width
+windowHeight = 720  # Replace with actual window height
+
+
+mouseX = this.mousePosition.x
+mouseY = this.mousePosition.y
+# println(mouseX)
+# println(mouseY)
+
+# UI Element position and size in screen space (MUST BE SCALED)
+screenElementX = (uiElement.position.x + this.mousePositionEditorGameWindowOffset.x)
+screenElementY = (uiElement.position.y + this.mousePositionEditorGameWindowOffset.y)
+screenElementWidth = uiElement.size.x
+screenElementHeight = uiElement.size.y
+
+# Check if the mouse is inside the UI element
+if mouseX < screenElementX
+    eventWasInsideThisButton = false
+elseif mouseX > screenElementX + screenElementWidth
+    eventWasInsideThisButton = false
+elseif mouseY < screenElementY
+    eventWasInsideThisButton = false
+elseif mouseY > screenElementY + screenElementHeight
+    eventWasInsideThisButton = false
+end
+
 
                         if !eventWasInsideThisButton
                             uiElement.isHovered = false
@@ -161,15 +180,15 @@ module InputModule
                         end
                         insideAnyElement = true
 
-                        if split("$(typeof(uiElement))", ".")[end] == "ScreenButton"
-                            # SDL2.SDL_SetCursor(this.cursorBank["crosshair"])
+                        if JulGame.IS_DEBUG
+                            SDL2.SDL_SetCursor(this.cursorBank["crosshair"])
                         end
-                        
+
                         JulGame.UI.handle_event(uiElement, evt, this.mousePosition.x, this.mousePosition.y)
                     end
 
-                    if !insideAnyElement
-                        # SDL2.SDL_SetCursor(this.defaultCursor)
+                    if JulGame.IS_DEBUG && !insideAnyElement
+                        SDL2.SDL_SetCursor(this.defaultCursor)
                     end
                 end
 
@@ -238,6 +257,7 @@ module InputModule
             end
             if evt.type == SDL2.SDL_KEYDOWN && evt.key.keysym.scancode == SDL2.SDL_SCANCODE_F3
                 this.debug = !this.debug
+                JulGame.IS_DEBUG = !JulGame.IS_DEBUG
             end
 
             keyboardState = unsafe_wrap(Array, SDL2.SDL_GetKeyboardState(C_NULL), 300; own = false)
@@ -280,10 +300,9 @@ module InputModule
             @debug(string("Window $(event.window.windowID) exposed"))
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_MOVED
             @debug(string("Window $(event.window.windowID) moved to $(event.window.data1),$(event.window.data2)"))
-        elseif windowEvent == SDL2.SDL_WINDOWEVENT_RESIZED # todo: update zoom and viewport size here
+        elseif windowEvent == SDL2.SDL_WINDOWEVENT_RESIZED
             if !JulGame.IS_EDITOR
                 @debug(string("Window $(event.window.windowID) resized to $(event.window.data1)x$(event.window.data2)"))
-                JulGame.MainLoopModule.update_viewport(MAIN, event.window.data1, event.window.data2)
             end
         elseif windowEvent == SDL2.SDL_WINDOWEVENT_SIZE_CHANGED
             @debug(string("Window $(event.window.windowID) size changed to $(event.window.data1)x$(event.window.data2)"))
@@ -354,6 +373,10 @@ module InputModule
                 deleteat!(this.mouseButtonsHeldDown, findfirst(x -> x == button, this.mouseButtonsHeldDown))
             end
         end
+    end
+
+    function update_input_state(this::Input, data::Dict{String, Any})
+        this.buttonsHeldDown = [key for (key, value) in data if value]        
     end
 
     function get_button_held_down(this::Input, button::String)

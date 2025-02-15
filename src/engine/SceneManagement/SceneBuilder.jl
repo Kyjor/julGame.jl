@@ -14,12 +14,14 @@ module SceneBuilderModule
     mutable struct Scene
         scene
         srcPath::String
-        function Scene(sceneFileName::String, srcPath::String = joinpath(pwd(), ".."))
+        type::String
+
+        function Scene(sceneFileName::String, srcPath::String = joinpath(pwd(), ".."), type::String="SDLRenderer")
             this = new()  
 
             this.scene = sceneFileName
             this.srcPath = srcPath 
-
+            this.type = type
             path = Base.load_path()[1]
             JulGame.IS_PACKAGE_COMPILED = occursin("share", path) && occursin("Project.toml", path)
             if Sys.isapple() && JulGame.IS_PACKAGE_COMPILED
@@ -27,30 +29,26 @@ module SceneBuilderModule
             end
 
             JulGame.BasePath = srcPath
+            if type == "Web"
+                JulGame.IS_WEB = true
+            end
 
             return this
         end    
     end
     
-    function load_and_prepare_scene(this::Scene, main; config=parse_config(), windowName::String="Game", isWindowResizable::Bool=false, zoom::Float64=1.0, autoScaleZoom::Bool=false, globals = [])
+    function load_and_prepare_scene(this::Scene, main; config=parse_config(), windowName::String="Game", isWindowResizable::Bool=false, globals = [])
         config = fill_in_config(config)
 
         windowName::String = windowName
         size::Vector2 = Vector2(parse(Int32, get(config, "Width", DEFAULT_CONFIG["Width"])), parse(Int32, get(config, "Height", DEFAULT_CONFIG["Height"])))
         isResizable::Bool = isWindowResizable
-        zoom::Float64 = zoom
-        autoScaleZoom::Bool = autoScaleZoom
         targetFrameRate::Int32 = parse(Int32, get(config, "FrameRate", DEFAULT_CONFIG["FrameRate"]))
-
-        if autoScaleZoom 
-             zoom = 1.0
-        end
 
         if main !== nothing
             JulGame.MAIN = main
         end
         MAIN.windowName = windowName
-        MAIN.zoom = zoom
         MAIN.globals = globals
         MAIN.level = this
         MAIN.targetFrameRate = targetFrameRate
@@ -63,13 +61,12 @@ module SceneBuilderModule
 		end
 
         flags = SDL2.SDL_RENDERER_ACCELERATED |
-		(JulGame.IS_EDITOR ? (SDL2.SDL_WINDOW_POPUP_MENU | SDL2.SDL_WINDOW_ALWAYS_ON_TOP | SDL2.SDL_WINDOW_BORDERLESS) : 0) |
-		(isResizable || JulGame.IS_EDITOR ? SDL2.SDL_WINDOW_RESIZABLE : 0) |
 		(size == Math.Vector2() ? SDL2.SDL_WINDOW_FULLSCREEN_DESKTOP : 0)  |
         (get(config, "Fullscreen", DEFAULT_CONFIG["Fullscreen"]) == "1" ? SDL2.SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
 
         MAIN.screenSize = size
-        if !JulGame.IS_EDITOR
+        
+        if !JulGame.IS_EDITOR && !JulGame.IS_WEB
             MAIN.window = SDL2.SDL_CreateWindow(MAIN.windowName, SDL2.SDL_WINDOWPOS_CENTERED, SDL2.SDL_WINDOWPOS_CENTERED, MAIN.screenSize.x, MAIN.screenSize.y, flags)
             JulGame.Renderer::Ptr{SDL2.SDL_Renderer} = SDL2.SDL_CreateRenderer(MAIN.window, -1, SDL2.SDL_RENDERER_ACCELERATED)
         end
@@ -85,6 +82,9 @@ module SceneBuilderModule
         if size.y < MAIN.scene.camera.size.y && size.y > 0
             MAIN.scene.camera.size = Vector2(MAIN.scene.camera.size.x, size.y)
         end
+        if !JulGame.IS_EDITOR && !JulGame.IS_WEB
+            SDL2.SDL_RenderSetLogicalSize(JulGame.Renderer, MAIN.scene.camera.size.x, MAIN.scene.camera.size.y)
+        end
         
         for uiElement in MAIN.scene.uiElements
             if "$(typeof(uiElement))" == "JulGame.UI.TextBoxModule.Textbox" && !uiElement.isWorldEntity
@@ -97,21 +97,30 @@ module SceneBuilderModule
         add_scripts_to_entities(BasePath)
 
         MAIN.assets = joinpath(BasePath, "assets")
-        JulGame.MainLoopModule.prepare_window_scripts_and_start_loop(size, isResizable, autoScaleZoom)
+        JulGame.MainLoopModule.prepare_window_scripts_and_start_loop(size)
     end
 
     function deserialize_and_build_scene(this::Scene)
+        
         scene = deserialize_scene(joinpath(BasePath, "scenes", this.scene))
         
         @debug String("Changing scene to $(this.scene)")
         @debug String("Entities in main scene: $(length(MAIN.scene.entities))")
 
         for entity in scene[1]
-            push!(MAIN.scene.entities, entity)
+            if !any(e.id == entity.id for e in MAIN.scene.entities)
+                push!(MAIN.scene.entities, entity)
+            else
+                println("duplicate entity found (persistence)")
+            end
         end
-
+        
         for uiElement in scene[2]
-            push!(MAIN.scene.uiElements, uiElement)
+            if !any(e.id == uiElement.id for e in MAIN.scene.uiElements)
+                push!(MAIN.scene.uiElements, uiElement)
+            else
+                println("duplicate ui element found (persistence)")
+            end
         end
 
         for uiElement in MAIN.scene.uiElements
@@ -168,7 +177,11 @@ module SceneBuilderModule
         @debug string("Path: ", path)
         @debug string("Entities: ", length(MAIN.scene.entities))
         if !JulGame.IS_PACKAGE_COMPILED
-            foreach(file -> Base.include(JulGame.ScriptModule, file), filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
+            foreach(file -> try
+                Base.include(JulGame.ScriptModule, file)
+            catch e
+                println("Error including $file: ", e)
+            end, filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
         end
 
         for entity in MAIN.scene.entities

@@ -577,11 +577,16 @@ function show_script_editor(entity, newScriptText)
         
         script = display_files(joinpath(JulGame.BasePath, "scripts"), "scripts", "Add Script")
         if script != ""
+            @debug("Adding script: $(script) to: $(entity.name)")
             Base.include(JulGame.ScriptModule, joinpath(JulGame.BasePath, "scripts", "$(script).jl"))
             module_name = getfield(JulGame.ScriptModule, Symbol("$(script)Module"))
             constructor = Base.invokelatest(getfield, module_name, Symbol(script)) 
             newScript = Base.invokelatest(constructor)
             newScript.parent = entity
+            # TODO: Get this working
+            # if JulGame.IS_EDITOR_PLAY_MODE 
+            #     JulGame.initialize(newScript)
+            # end
             push!(entity.scripts, newScript)
         end
 

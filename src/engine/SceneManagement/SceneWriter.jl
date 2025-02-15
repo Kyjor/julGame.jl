@@ -37,7 +37,7 @@ module SceneWriterModule
         for uiElement in uiElements
             if "$(typeof(uiElement))" == "JulGame.UI.ScreenButtonModule.ScreenButton"
                 push!(uiElementsDict, Dict(
-                    "id" => count, 
+                    "id" => string(uiElement.id), 
                     # TODO: "alpha" => uiElement.alpha, 
                     "buttonDownSpritePath" => normalize_path(uiElement.buttonDownSpritePath), 
                     "buttonUpSpritePath" => normalize_path(uiElement.buttonUpSpritePath), 
@@ -53,8 +53,9 @@ module SceneWriterModule
                     ))
             else
                 push!(uiElementsDict, Dict(
-                    "id" => count, 
+                    "id" => string(uiElement.id), 
                     "alpha" => uiElement.alpha, 
+                    "anchorOffset" => Dict("x" => uiElement.anchorOffset.x, "y" => uiElement.anchorOffset.y),
                     "fontPath" => normalize_path(uiElement.fontPath), 
                     "fontSize" => uiElement.fontSize, 
                     "isActive" => uiElement.isActive,
@@ -74,7 +75,7 @@ module SceneWriterModule
         entitiesJson = Dict( 
             "Entities" => entitiesDict,
             "UIElements" => uiElementsDict,
-            "Camera" => Dict("position" => Dict("x" => camera.position.x, "y" => camera.position.y), "backgroundColor" => Dict("r" => camera.backgroundColor[1], "g" => camera.backgroundColor[2], "b" => camera.backgroundColor[3], "a" => camera.backgroundColor[4]), "size" => Dict("x" => camera.size.x, "y" => camera.size.y), "offset" => Dict("x" => camera.offset.x, "y" => camera.offset.y), "startingCoordinates" => Dict("x" => camera.startingCoordinates.x, "y" => camera.startingCoordinates.y))
+            "Camera" => Dict("position" => Dict("x" => camera.position.x, "y" => camera.position.y), "backgroundColor" => Dict("r" => camera.backgroundColor[1], "g" => camera.backgroundColor[2], "b" => camera.backgroundColor[3], "a" => camera.backgroundColor[4]), "size" => Dict("x" => camera.size.x, "y" => camera.size.y), "offset" => Dict("x" => camera.offset.x, "y" => camera.offset.y))
             )
         try
             name = split(sceneName,".")[1]

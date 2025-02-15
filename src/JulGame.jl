@@ -3,10 +3,16 @@ module JulGame
     using SimpleDirectMediaLayer
     const SDL2 = SimpleDirectMediaLayer
     MAIN = nothing
-    IS_EDITOR = false
+
+    IS_WEB::Bool = false
+    IS_EDITOR::Bool = false
+    IS_EDITOR_PLAY_MODE::Bool = false
+    IS_DEBUG::Bool = false
     IS_PACKAGE_COMPILED::Bool = false
+
     DELTA_TIME = 0.0
     # TODO: Create a globals file
+    
     SCENE_CACHE::Dict = Dict{String, Any}()
     IMAGE_CACHE::Dict = Dict{String, Any}()
     FONT_CACHE::Dict = Dict{String, Any}()

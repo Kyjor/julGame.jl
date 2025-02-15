@@ -5,11 +5,13 @@ module TextBoxModule
     export TextBox      
     mutable struct TextBox
         alpha
+        anchorOffset::Vector2
+        #anchor::JulGame.Enum
         clickEvents
         font
         fontPath::String
         fontSize::Int32
-        id::Int32
+        id::String
         isActive::Bool
         isCenteredX::Bool
         isCenteredY::Bool
@@ -24,7 +26,7 @@ module TextBoxModule
         textTexture
         isConstructed::Bool
 
-        function TextBox(name::String, fontPath::String, fontSize::Number, position::Math.Vector2, text::String, isCenteredX::Bool = false, isCenteredY::Bool = false; isWorldEntity::Bool=false) # TODO: replace bool with enum { left, center, right, etc }
+        function TextBox(name::String, fontPath::String, fontSize::Number, position::Math.Vector2, text::String, isCenteredX::Bool = false, isCenteredY::Bool = false; anchorOffset::Math.Vector2 = Math.Vector2(0,0), id::String=JulGame.generate_uuid(), isWorldEntity::Bool=false) # TODO: replace bool with enum { left, center, right, etc }
             this = new()
 
             this.isConstructed = false
@@ -32,7 +34,8 @@ module TextBoxModule
             this.clickEvents = []
             this.fontPath = fontPath
             this.fontSize = Int32(fontSize)
-            this.id = Int32(0)
+            this.id = id
+            this.anchorOffset = anchorOffset
             this.isCenteredX = isCenteredX
             this.isCenteredY = isCenteredY
             this.name = name
@@ -62,12 +65,16 @@ module TextBoxModule
         end
 
         if debug
+            rgba = (r = Ref(UInt8(0)), g = Ref(UInt8(0)), b = Ref(UInt8(0)), a = Ref(UInt8(255)))
+            SDL2.SDL_GetRenderDrawColor(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, rgba.r, rgba.g, rgba.b, rgba.a)
+            SDL2.SDL_SetRenderDrawColor(Renderer, 0, 255, 0, 255);
             SDL2.SDL_RenderDrawLines(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, [
                 SDL2.SDL_Point(this.position.x, this.position.y), 
                 SDL2.SDL_Point(this.position.x + this.size.x, this.position.y),
                 SDL2.SDL_Point(this.position.x + this.size.x, this.position.y + this.size.y), 
                 SDL2.SDL_Point(this.position.x, this.position.y + this.size.y), 
                 SDL2.SDL_Point(this.position.x, this.position.y)], 5)
+            SDL2.SDL_SetRenderDrawColor(JulGame.Renderer::Ptr{SDL2.SDL_Renderer}, rgba.r[], rgba.g[], rgba.b[], rgba.a[]);
         end
 
         camera = MAIN.scene.camera
@@ -184,10 +191,10 @@ module TextBoxModule
         end
 
         if this.isCenteredX
-            this.position = Math.Vector2(max(MAIN.scene.camera.size.x/2 - this.size.x/2, 0), this.position.y)
+            this.position = Math.Vector2(max(MAIN.scene.camera.size.x/2 - this.size.x/2, 0) + this.anchorOffset.x, this.position.y)    
         end
         if this.isCenteredY
-            this.position = Math.Vector2(this.position.x, max(MAIN.scene.camera.size.y/2 - this.size.y/2, 0))
+            this.position = Math.Vector2(this.position.x, max(MAIN.scene.camera.size.y/2 - this.size.y/2, 0) + this.anchorOffset.y)
         end
     end
     
