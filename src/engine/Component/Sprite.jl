@@ -254,7 +254,7 @@ module SpriteModule
             if rw != C_NULL
                 @debug("loading image from cache")
                 @debug("comma separated path: ", get_comma_separated_path(imagePath))
-                SDL2.IMG_Load_RW(rw, 1)
+                return SDL2.IMG_Load_RW(rw, 1)
             end
         end
         @debug "Loading image from disk $(fullPath) for sprite, there are $(length(JulGame.IMAGE_CACHE)) images in cache"

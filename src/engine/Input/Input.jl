@@ -553,6 +553,18 @@ end
         SDL2.SDL_PushEvent(key_event)
     end
 
+    function get_comma_separated_path(path::String)
+        # Normalize the path to use forward slashes
+        normalized_path = replace(path, '\\' => '/')
+        
+        # Split the path into components
+        parts = split(normalized_path, '/')
+        
+        result = join(parts[1:end], ",")
+    
+        return result  
+    end
+
     """
         set_cursor_with_image(this, imagePath, x, y, scale_factor)
 
@@ -568,7 +580,21 @@ end
         set_cursor_with_image(this, "cursor.png", 10, 10, 2.0)  # Scales up by 2x
     """ 
     function set_cursor_with_image(this::Input, imagePath::String, x::Int, y::Int, scale_factor::Float64=1.0)
-        surface = SDL2.IMG_Load(pointer(imagePath))
+        surface = nothing
+        println("Keys in countDict: ", collect(keys(JulGame.IMAGE_CACHE)))
+        if haskey(JulGame.IMAGE_CACHE, get_comma_separated_path(imagePath))
+            raw_data = JulGame.IMAGE_CACHE[get_comma_separated_path(imagePath)]
+            rw = SDL2.SDL_RWFromConstMem(pointer(raw_data), length(raw_data))
+            if rw != C_NULL
+                @info("loading cursor from cache")
+                @debug("comma separated path: ", get_comma_separated_path(imagePath))
+                surface = SDL2.IMG_Load_RW(rw, 1)
+            end
+        else 
+            @info("loading cursor from disk")
+            surface = SDL2.IMG_Load(pointer(joinpath(JulGame.BasePath, "assets", "images", imagePath)))
+        end
+        @debug "Loading image from disk $(fullPath) for sprite, there are $(length(JulGame.IMAGE_CACHE)) images in cache"
         
         if surface == C_NULL
             @error "Failed to load cursor image: $(unsafe_string(SDL2.SDL_GetError()))"
