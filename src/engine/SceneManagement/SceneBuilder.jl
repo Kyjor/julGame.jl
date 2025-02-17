@@ -10,42 +10,24 @@ module SceneBuilderModule
     using ..SceneReaderModule
     using JSON3
 
-    function init()
-        if isdir(joinpath(pwd(), "..", "scripts")) #dev builds
-            # println("Loading scripts...")
-            include.(filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
-            foreach(file -> try
-                Base.include(JulGame.ScriptModule, file)
-            catch e
-                println("Error including $file: ", e)
-            end, filter(contains(r".jl$"), readdir(joinpath(pwd(), "..", "scripts"); join=true)))
-            @info "Loaded scripts"
-        else
-            script_folder_name = "scripts"
-            current_dir = pwd()
-            
-            # Find all folders in the current directory
-            folders = filter(isdir, readdir(current_dir))
-            
-            # Check each folder for the "scripts" subfolder
-            for folder in folders
-                scripts_path = joinpath(current_dir, folder, script_folder_name)
-                if isdir(scripts_path)
-                    println("Loading scripts in $scripts_path...")
-                    foreach(file -> try
-                        Base.include(JulGame.ScriptModule, file)
-                    catch e
-                        println("Error including $file: ", e)
-                    end, filter(contains(r".jl$"), readdir(scripts_path; join=true)))
-                    break  # Exit loop if "scripts" folder is found in any parent folder
-                end
-            end
-            @info "Loaded scripts"
-        end
-    end
-
     if ccall(:jl_generating_output, Cint, ()) == 1
-        init()
+        script_folder_name = "scripts"
+        current_dir = pwd()
+        
+        # Find all folders in the current directory
+        folders = filter(isdir, readdir(current_dir))
+        
+        # Check each folder for the "scripts" subfolder
+        for folder in folders
+            scripts_path = joinpath(current_dir, folder, script_folder_name)
+            if isdir(scripts_path)
+                println("Loading scripts in $scripts_path")
+                include.(filter(contains(r".jl$"), readdir(scripts_path; join=true)))
+                break  # Exit loop if "scripts" folder is found in any parent folder
+            end
+        end
+        JulGame.ScriptModule = @__MODULE__
+        @info "Loaded scripts"
     end
 
     export Scene
