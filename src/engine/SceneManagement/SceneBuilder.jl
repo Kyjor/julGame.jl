@@ -32,7 +32,6 @@ module SceneBuilderModule
                 scripts_path = joinpath(current_dir, folder, script_folder_name)
                 if isdir(scripts_path)
                     println("Loading scripts in $scripts_path...")
-                    include.(filter(contains(r".jl$"), readdir(scripts_path; join=true)))
                     foreach(file -> try
                         Base.include(JulGame.ScriptModule, file)
                     catch e
