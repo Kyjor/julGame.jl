@@ -20,6 +20,7 @@ module JulGame
 
     Coroutines::Vector = []
 
+    ProjectModule = ""
     ScriptModule = Module(:Scripts)
 
     include("ModuleExtensions/SDL2Extension.jl")

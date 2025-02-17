@@ -10,26 +10,6 @@ module SceneBuilderModule
     using ..SceneReaderModule
     using JSON3
 
-    if ccall(:jl_generating_output, Cint, ()) == 1
-        script_folder_name = "scripts"
-        current_dir = pwd()
-        
-        # Find all folders in the current directory
-        folders = filter(isdir, readdir(current_dir))
-        
-        # Check each folder for the "scripts" subfolder
-        for folder in folders
-            scripts_path = joinpath(current_dir, folder, script_folder_name)
-            if isdir(scripts_path)
-                println("Loading scripts in $scripts_path")
-                include.(filter(contains(r".jl$"), readdir(scripts_path; join=true)))
-                break  # Exit loop if "scripts" folder is found in any parent folder
-            end
-        end
-        JulGame.ScriptModule = @__MODULE__
-        @info "Loaded scripts"
-    end
-
     export Scene
     mutable struct Scene
         scene
@@ -121,7 +101,6 @@ module SceneBuilderModule
     end
 
     function deserialize_and_build_scene(this::Scene)
-        
         scene = deserialize_scene(joinpath(BasePath, "scenes", this.scene))
         
         @debug String("Changing scene to $(this.scene)")
@@ -131,7 +110,7 @@ module SceneBuilderModule
             if !any(e.id == entity.id for e in MAIN.scene.entities)
                 push!(MAIN.scene.entities, entity)
             else
-                println("duplicate entity found (persistence)")
+                @warn("duplicate entity found (persistence)")
             end
         end
         
@@ -139,7 +118,7 @@ module SceneBuilderModule
             if !any(e.id == uiElement.id for e in MAIN.scene.uiElements)
                 push!(MAIN.scene.uiElements, uiElement)
             else
-                println("duplicate ui element found (persistence)")
+                @warn("duplicate ui element found (persistence)")
             end
         end
 
@@ -197,12 +176,23 @@ module SceneBuilderModule
         @debug string("Path: ", path)
         @debug string("Entities: ", length(MAIN.scene.entities))
         if !JulGame.IS_PACKAGE_COMPILED
+            @debug "Package not compiled, loading scripts"
             foreach(file -> try
                 Base.include(JulGame.ScriptModule, file)
             catch e
                 println("Error including $file: ", e)
             end, filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
         end
+
+        scripts_mod = filter(x -> occursin(r"\.Scripts$", string(x)), ccall(:jl_module_usings, Any, (Any,), getfield(Main, Symbol("$(JulGame.ProjectModule)"))))
+        if scripts_mod !== nothing
+            JulGame.ScriptModule = scripts_mod[1]
+        end
+
+        modules = [getfield(Main, name) for name in names(Main, all=true)]
+
+        println(modules)
+
 
         for entity in MAIN.scene.entities
             scriptCounter = 1
@@ -236,7 +226,6 @@ module SceneBuilderModule
                         catch e
                             @warn string(e)
                         end
-                        #setfield!(newScript, key, value)
                     end
                 catch e
                     @error string(e)
