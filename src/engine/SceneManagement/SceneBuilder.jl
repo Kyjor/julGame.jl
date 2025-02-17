@@ -189,11 +189,6 @@ module SceneBuilderModule
             JulGame.ScriptModule = scripts_mod[1]
         end
 
-        modules = [getfield(Main, name) for name in names(Main, all=true)]
-
-        println(modules)
-
-
         for entity in MAIN.scene.entities
             scriptCounter = 1
             for script in entity.scripts
