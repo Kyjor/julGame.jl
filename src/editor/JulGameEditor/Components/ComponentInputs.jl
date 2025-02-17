@@ -278,7 +278,6 @@ function show_animator_properties(animator, animation_window_dict, animator_prev
                                         end
                                     end
                                 catch e
-                                    rethrow(e)
                                 end
                             end
                         end
@@ -290,7 +289,6 @@ function show_animator_properties(animator, animation_window_dict, animator_prev
             end  
         end
     catch e
-        rethrow(e)
     end
 end
 

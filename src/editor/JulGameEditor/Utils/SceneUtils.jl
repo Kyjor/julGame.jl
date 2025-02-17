@@ -13,7 +13,6 @@ function load_scene(scenePath::String)
     try
         game = SceneLoaderModule.load_scene_from_editor(scenePath);
     catch e
-        rethrow(e)
     end
 
     return game
@@ -47,7 +46,6 @@ function get_all_scenes_from_folder(projectPath::String)
             end
         end
     catch e
-        rethrow(e)
     end
 
     return sceneFiles
@@ -69,7 +67,6 @@ function get_all_scenes_from_base_folder(projectPath::String)
             end
         end
     catch e
-        rethrow(e)
     end
 
     return sceneFiles
@@ -108,7 +105,6 @@ function load_scene(scenePath::String, renderer)
     try
         game = SceneLoaderModule.load_scene_from_editor(scenePath, renderer);
     catch e
-        rethrow(e)
     end
 
     return game

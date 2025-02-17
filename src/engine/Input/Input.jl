@@ -581,7 +581,6 @@ end
     """ 
     function set_cursor_with_image(this::Input, imagePath::String, x::Int, y::Int, scale_factor::Float64=1.0)
         surface = nothing
-        println("Keys in countDict: ", collect(keys(JulGame.IMAGE_CACHE)))
         if haskey(JulGame.IMAGE_CACHE, get_comma_separated_path(imagePath))
             raw_data = JulGame.IMAGE_CACHE[get_comma_separated_path(imagePath)]
             rw = SDL2.SDL_RWFromConstMem(pointer(raw_data), length(raw_data))

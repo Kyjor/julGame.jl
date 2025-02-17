@@ -64,7 +64,6 @@ module EntityModule
         catch e
             @error string(e)
             Base.show_backtrace(stdout, catch_backtrace())
-            rethrow(e)
         end
     end
 
