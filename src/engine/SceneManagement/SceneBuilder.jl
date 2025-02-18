@@ -184,9 +184,12 @@ module SceneBuilderModule
             end, filter(contains(r".jl$"), readdir(joinpath(path, "scripts"); join=true)))
         end
 
-        scripts_mod = filter(x -> occursin(r"\.Scripts$", string(x)), ccall(:jl_module_usings, Any, (Any,), getfield(Main, Symbol("$(JulGame.ProjectModule)"))))
-        if scripts_mod !== nothing
-            JulGame.ScriptModule = scripts_mod[1]
+        if JulGame.ProjectModule != ""
+            @debug "Loading scripts from project module: $(JulGame.ProjectModule)"
+            scripts_mod = filter(x -> occursin(r"\.Scripts$", string(x)), ccall(:jl_module_usings, Any, (Any,), getfield(Main, Symbol("$(JulGame.ProjectModule)"))))
+            if scripts_mod !== nothing
+                JulGame.ScriptModule = scripts_mod[1]
+            end
         end
 
         for entity in MAIN.scene.entities

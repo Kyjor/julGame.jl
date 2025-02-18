@@ -187,12 +187,15 @@ module Editor
                             if confirmation_dialog(currentDialog) == "ok" && currentSceneName != ""
                                 if currentSceneMain === nothing
                                     currentSceneMain = load_scene(currentScenePath, renderer)
-                                    gameCamera = currentSceneMain.scene.camera
-                                    cameraWindow.camera = gameCamera
                                 else
                                     JulGame.change_scene(String(currentSceneName))
+                                end
+                                if currentSceneMain !== nothing && !(currentSceneMain isa Ptr)
                                     gameCamera = currentSceneMain.scene.camera
                                     cameraWindow.camera = gameCamera
+                                else 
+                                    currentSceneMain = nothing
+                                    @error "Main not loaded properly"
                                 end
                             end
                         elseif currentDialog[] == "New Scene"
