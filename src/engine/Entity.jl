@@ -76,16 +76,22 @@ module EntityModule
             try
                 Base.invokelatest(JulGame.update, script, deltaTime) 
             catch e
-                Threads.@spawn begin
-                    err_str = string(e)
-                    formatted_err = format_method_error(err_str)  # Format MethodError
-                    truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
-                    
-                    @error "Error occurred" exception=truncated_err
-                    Base.show_backtrace(stderr, catch_backtrace())
+                task = @task begin
+                    print_error(e)
                 end
+                schedule(task)
+                yield()
             end
         end
+    end
+
+    function print_error(e)
+        err_str = string(e)
+        formatted_err = format_method_error(err_str)  # Format MethodError
+        truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
+                    
+        @error "Error occurred" exception=truncated_err
+        Base.show_backtrace(stderr, catch_backtrace())
     end
 
     function format_method_error(error_msg::String)
