@@ -96,8 +96,17 @@ module TextBoxModule
             this.fontPath = fontPath
         end
 
+        # prevents segfault when text is empty
+        if this.text == ""
+            this.text = " "
+        end
+
         this.renderText = CallSDLFunction(SDL2.TTF_RenderUTF8_Blended, this.font, this.text, SDL2.SDL_Color(255,255,255,this.alpha))
-        
+        if this.renderText == C_NULL
+            error("Failed to render text for textbox $(this.name)")
+            return
+        end
+
         surface = unsafe_wrap(Array, this.renderText, 10; own = false)
         this.size = Math.Vector2(surface[1].w, surface[1].h)
         
