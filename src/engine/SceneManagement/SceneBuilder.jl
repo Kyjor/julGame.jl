@@ -106,6 +106,11 @@ module SceneBuilderModule
         @debug String("Changing scene to $(this.scene)")
         @debug String("Entities in main scene: $(length(MAIN.scene.entities))")
 
+        if scene === nothing
+            @error "Error deserialize_and_build_scene"
+            return
+        end
+
         for entity in scene[1]
             if !any(e.id == entity.id for e in MAIN.scene.entities)
                 push!(MAIN.scene.entities, entity)

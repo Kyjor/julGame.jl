@@ -11,6 +11,7 @@ module InputModule
         debug::Bool
         defaultCursor
         didMouseEventOccur::Bool
+        didMouseMotionOccur::Bool
         editorCallback::Union{Function, Nothing}
         isWindowFocused::Bool
         main
@@ -48,6 +49,7 @@ module InputModule
             this.buttonsReleased = []
             this.debug = false
             this.didMouseEventOccur = false
+            this.didMouseMotionOccur = false
             this.editorCallback = nothing
             this.isWindowFocused = true
             this.mouseButtonsPressedDown = []
@@ -108,7 +110,9 @@ module InputModule
 
     function poll_input(this::Input)
         this.buttonsPressedDown = []
+        this.mouseButtonsPressedDown = []
         this.didMouseEventOccur = false
+        this.didMouseMotionOccur = false
         event_ref = Ref{SDL2.SDL_Event}()
        
 
@@ -128,6 +132,9 @@ module InputModule
 
             if evt.type == SDL2.SDL_MOUSEMOTION || evt.type == SDL2.SDL_MOUSEBUTTONDOWN || evt.type == SDL2.SDL_MOUSEBUTTONUP
                 this.didMouseEventOccur = true
+                if evt.type == SDL2.SDL_MOUSEMOTION
+                    this.didMouseMotionOccur = true
+                end
                 if evt.type == SDL2.SDL_MOUSEBUTTONDOWN
                     @debug("Mouse button down at $(this.mousePosition)")
                 end
@@ -145,33 +152,33 @@ module InputModule
                         end
                         # Check position of button to see which we are interacting with
                         eventWasInsideThisButton = true
-# Assuming:
-# - windowWidth and windowHeight are the physical dimensions of the window
-windowWidth = 1280  # Replace with actual window width
-windowHeight = 720  # Replace with actual window height
+                        # Assuming:
+                        # - windowWidth and windowHeight are the physical dimensions of the window
+                        windowWidth = 1280  # Replace with actual window width
+                        windowHeight = 720  # Replace with actual window height
 
 
-mouseX = this.mousePosition.x
-mouseY = this.mousePosition.y
-# println(mouseX)
-# println(mouseY)
+                        mouseX = this.mousePosition.x
+                        mouseY = this.mousePosition.y
+                        # println(mouseX)
+                        # println(mouseY)
 
-# UI Element position and size in screen space (MUST BE SCALED)
-screenElementX = (uiElement.position.x + this.mousePositionEditorGameWindowOffset.x)
-screenElementY = (uiElement.position.y + this.mousePositionEditorGameWindowOffset.y)
-screenElementWidth = uiElement.size.x
-screenElementHeight = uiElement.size.y
+                        # UI Element position and size in screen space (MUST BE SCALED)
+                        screenElementX = (uiElement.position.x + this.mousePositionEditorGameWindowOffset.x)
+                        screenElementY = (uiElement.position.y + this.mousePositionEditorGameWindowOffset.y)
+                        screenElementWidth = uiElement.size.x
+                        screenElementHeight = uiElement.size.y
 
-# Check if the mouse is inside the UI element
-if mouseX < screenElementX
-    eventWasInsideThisButton = false
-elseif mouseX > screenElementX + screenElementWidth
-    eventWasInsideThisButton = false
-elseif mouseY < screenElementY
-    eventWasInsideThisButton = false
-elseif mouseY > screenElementY + screenElementHeight
-    eventWasInsideThisButton = false
-end
+                        # Check if the mouse is inside the UI element
+                        if mouseX < screenElementX
+                            eventWasInsideThisButton = false
+                        elseif mouseX > screenElementX + screenElementWidth
+                            eventWasInsideThisButton = false
+                        elseif mouseY < screenElementY
+                            eventWasInsideThisButton = false
+                        elseif mouseY > screenElementY + screenElementHeight
+                            eventWasInsideThisButton = false
+                        end
 
 
                         if !eventWasInsideThisButton
@@ -265,10 +272,6 @@ end
         end
         if this.isTestButtonClicked
             lift_mouse_after_simulated_click(this)
-        end
-        if !this.didMouseEventOccur
-            this.mouseButtonsPressedDown = []
-            this.mouseButtonsReleased = []
         end
     end
 
