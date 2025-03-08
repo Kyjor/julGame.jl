@@ -76,22 +76,27 @@ module EntityModule
             try
                 Base.invokelatest(JulGame.update, script, deltaTime) 
             catch e
+                bt = catch_backtrace()
                 task = @task begin
-                    print_error(e)
+                    print_error(e, typeof(script), bt)
                 end
                 schedule(task)
                 yield()
+                if JulGame.IS_DEBUG
+                    @error "Error occurred in script of type: $(typeof(script))" exception=e
+                    Base.show_backtrace(stderr, bt)
+                end
             end
         end
     end
 
-    function print_error(e)
+    function print_error(e, script_type, bt)
         err_str = string(e)
         formatted_err = format_method_error(err_str)  # Format MethodError
         truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
                     
-        @error "Error occurred" exception=truncated_err
-        Base.show_backtrace(stderr, catch_backtrace())
+        @error "Error occurred in script of type: $script_type" exception=truncated_err
+        Base.show_backtrace(stderr, bt)
     end
 
     function format_method_error(error_msg::String)
