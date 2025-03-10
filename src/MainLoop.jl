@@ -595,7 +595,7 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
 			end
 
 			pos1::Math.Vector2 = windowPos !== nothing ? windowPos : Math.Vector2(0, 0)
-			this.input.mousePositionWorld = Math.Vector2(floor(Int32,(this.input.mousePosition.x - this.input.mousePositionEditorGameWindowOffset.x + (cameraPosition.x * SCALE_UNITS)) / SCALE_UNITS), floor(Int32,( this.input.mousePosition.y - this.input.mousePositionEditorGameWindowOffset.y + (cameraPosition.y * SCALE_UNITS)) / SCALE_UNITS))
+			this.input.mousePositionWorld = Math.Vector2f((this.input.mousePosition.x - this.input.mousePositionEditorGameWindowOffset.x + (cameraPosition.x * SCALE_UNITS)) / SCALE_UNITS, (this.input.mousePosition.y - this.input.mousePositionEditorGameWindowOffset.y + (cameraPosition.y * SCALE_UNITS)) / SCALE_UNITS)
 			rawMousePos = Math.Vector2f(this.input.mousePosition.x - pos1.x , this.input.mousePosition.y - pos1.y )
 			#region Debug
 			if DEBUG

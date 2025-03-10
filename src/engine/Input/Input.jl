@@ -20,7 +20,7 @@ module InputModule
         mouseButtonsReleased::Vector
         mousePosition
         mousePositionEditorGameWindowOffset::Vector2
-        mousePositionWorld
+        mousePositionWorld::Math.Vector2f
         joystick
         scanCodeStrings::Vector{String}
         scanCodes::Vector
@@ -57,7 +57,7 @@ module InputModule
             this.mouseButtonsReleased = []
             this.mousePosition = Math.Vector2(0,0)
             this.mousePositionEditorGameWindowOffset = Math.Vector2(0,0)
-            this.mousePositionWorld = Math.Vector2(0,0)
+            this.mousePositionWorld = Math.Vector2f(0,0)
             this.quit = false
             this.scanCodes = []
             this.scanCodeStrings = String[]
@@ -111,6 +111,7 @@ module InputModule
     function poll_input(this::Input)
         this.buttonsPressedDown = []
         this.mouseButtonsPressedDown = []
+        this.mouseButtonsReleased = []  # Clear the released buttons each frame
         this.didMouseEventOccur = false
         this.didMouseMotionOccur = false
         event_ref = Ref{SDL2.SDL_Event}()
@@ -358,23 +359,13 @@ module InputModule
     function handle_mouse_event(this::Input, event)
         if event.button.button == SDL2.SDL_BUTTON_LEFT || event.button.button == SDL2.SDL_BUTTON_MIDDLE || event.button.button == SDL2.SDL_BUTTON_RIGHT
             button = event.button.button
-            if event.type == SDL2.SDL_MOUSEBUTTONDOWN && !(button in this.mouseButtonsPressedDown)
+            if event.type == SDL2.SDL_MOUSEBUTTONDOWN && !(button in this.mouseButtonsHeldDown)
                 push!(this.mouseButtonsPressedDown, button)
-            elseif event.type == SDL2.SDL_MOUSEBUTTONUP && !(button in this.mouseButtonsReleased)
-                push!(this.mouseButtonsReleased, button)
-            end            
-        end
-
-        for button in this.mouseButtonsPressedDown
-            if !(button in this.mouseButtonsHeldDown)
                 push!(this.mouseButtonsHeldDown, button)
-            end
-        end
-
-        for button in this.mouseButtonsReleased
-            if button in this.mouseButtonsHeldDown
+            elseif event.type == SDL2.SDL_MOUSEBUTTONUP && (button in this.mouseButtonsHeldDown)
+                push!(this.mouseButtonsReleased, button)
                 deleteat!(this.mouseButtonsHeldDown, findfirst(x -> x == button, this.mouseButtonsHeldDown))
-            end
+            end            
         end
     end
 

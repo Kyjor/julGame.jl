@@ -82,10 +82,6 @@ module EntityModule
                 end
                 schedule(task)
                 yield()
-                if JulGame.IS_DEBUG
-                    @error "Error occurred in script of type: $(typeof(script))" exception=e
-                    Base.show_backtrace(stderr, bt)
-                end
             end
         end
     end
@@ -95,8 +91,24 @@ module EntityModule
         formatted_err = format_method_error(err_str)  # Format MethodError
         truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
                     
-        @error "Error occurred in script of type: $script_type" exception=truncated_err
-        Base.show_backtrace(stderr, bt)
+        st = Base.stacktrace(bt)
+        full_err_string = "Error occurred in script of type: $script_type\n $truncated_err\n"
+        # Format and print each frame
+        actual_frames = 0
+        for (i, frame) in enumerate(st)
+            if !contains(string(frame.file), "JulGame") && 
+                string(frame.file) != "./essentials.jl" && 
+                string(frame.file) != "./client.jl" && 
+                string(frame.file) != "./boot.jl" && 
+                string(frame.file) != "./loading.jl" && 
+                string(frame.file) != "./Base.jl" &&
+                string(frame.file) != "./dict.jl"
+
+                actual_frames += 1
+                full_err_string *= "[$actual_frames] $(frame.func) at $(frame.file):$(frame.line)\n"
+            end
+        end
+        @error full_err_string
     end
 
     function format_method_error(error_msg::String)
