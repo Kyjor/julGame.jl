@@ -393,11 +393,13 @@ end
 function destroy_entity_components(this::MainLoop, entity)
 	entitySprite = entity.sprite
 	if entitySprite != C_NULL
-		for j = eachindex(this.spriteLayers["$(entitySprite.layer)"])
-			if this.spriteLayers["$(entitySprite.layer)"][j] == entitySprite
-				Component.destroy(entitySprite)
-				deleteat!(this.spriteLayers["$(entitySprite.layer)"], j)
-				break
+		if haskey(this.spriteLayers, "$(entitySprite.layer)")	
+			for j = eachindex(this.spriteLayers["$(entitySprite.layer)"])
+				if this.spriteLayers["$(entitySprite.layer)"][j] == entitySprite
+					Component.destroy(entitySprite)
+					deleteat!(this.spriteLayers["$(entitySprite.layer)"], j)
+					break
+				end
 			end
 		end
 	end

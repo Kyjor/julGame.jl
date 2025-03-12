@@ -71,13 +71,13 @@ module ErrorLoggingModule
         formatted_err = format_method_error(err_str)  # Format MethodError
         truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
         full_err_string = "Error occurred : $(e)\n"
-        
+
         st = Base.stacktrace(exception.backtrace)
         # Format and print each frame
         actual_frames = 0
         for (i, frame) in enumerate(st)
-            if !contains(string(frame.file), "JulGame") && 
-                string(frame.file) != "./essentials.jl" && 
+            if  string(frame.file) != "./essentials.jl" && 
+                #!contains(string(frame.file), "JulGame") && 
                 string(frame.file) != "./client.jl" && 
                 string(frame.file) != "./boot.jl" && 
                 string(frame.file) != "./loading.jl" && 
