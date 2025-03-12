@@ -23,6 +23,10 @@ module JulGame
     ProjectModule = ""
     ScriptModule = Module(:Scripts)
 
+    include("engine/Logging/Logging.jl")
+    using .Logging
+    export ErrorLoggerModule
+
     include("ModuleExtensions/SDL2Extension.jl")
     const SDL2E = SDL2Extension
     export DELTA_TIME, IS_EDITOR, SDL2, SDL2E, MAIN

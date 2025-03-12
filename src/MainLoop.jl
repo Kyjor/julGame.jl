@@ -1,5 +1,6 @@
 module MainLoopModule
 	using ..JulGame
+	using ..JulGame.ErrorLoggingModule
 	using ..JulGame: Camera, Component, Input, Math, UI, SceneModule
     import ..JulGame: Component
     import ..JulGame.SceneManagement: SceneBuilderModule
@@ -15,6 +16,7 @@ module MainLoopModule
 		coroutine_condition
 		currentTestTime::Float64
 		debugTextBoxes::Vector{UI.TextBoxModule.TextBox}
+		errorLogger::ErrorLoggingModule.ErrorLogger
 		fpsManager::Ref{SDL2.LibSDL2.FPSmanager}
 		globals::Vector{Any}
 		input::Input
@@ -60,6 +62,7 @@ module MainLoopModule
 			this.testMode = false
 			this.testLength = 0.0
 			this.coroutine_condition = Condition()
+			this.errorLogger = ErrorLoggingModule.ErrorLogger()
 
 			return this
 		end
@@ -622,6 +625,11 @@ function game_loop(this::MainLoop, startTime::Ref{UInt64} = Ref(UInt64(0)), last
                          JulGame.render(db_textbox, false)
 			 	  	end
 				 end
+			end
+
+			if !istaskdone(this.errorLogger.task)
+				notify(this.errorLogger.condition)
+				yield()
 			end
 
 			if !JulGame.IS_EDITOR && !JulGame.IS_WEB

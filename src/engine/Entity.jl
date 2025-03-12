@@ -56,7 +56,7 @@ module EntityModule
     end
 
     function JulGame.add_script(this::Entity, script)
-        #println(string("Adding script of type: ", typeof(script), " to entity named " , this.name))
+        @debug(string("Adding script of type: ", typeof(script), " to entity named " , this.name))
         push!(this.scripts, script)
         script.parent = this
         try
@@ -76,99 +76,10 @@ module EntityModule
             try
                 Base.invokelatest(JulGame.update, script, deltaTime) 
             catch e
-                bt = catch_backtrace()
-                task = @task begin
-                    print_error(e, typeof(script), bt)
-                end
-                schedule(task)
-                yield()
+                JulGame.ErrorLoggingModule.log_error(JulGame.MAIN.errorLogger, string(e), current_exceptions())
             end
         end
     end
-
-    function print_error(e, script_type, bt)
-        err_str = string(e)
-        formatted_err = format_method_error(err_str)  # Format MethodError
-        truncated_err = length(formatted_err) > 1500 ? formatted_err[1:1500] * "..." : formatted_err
-                    
-        st = Base.stacktrace(bt)
-        full_err_string = "Error occurred in script of type: $script_type\n $truncated_err\n"
-        # Format and print each frame
-        actual_frames = 0
-        for (i, frame) in enumerate(st)
-            if !contains(string(frame.file), "JulGame") && 
-                string(frame.file) != "./essentials.jl" && 
-                string(frame.file) != "./client.jl" && 
-                string(frame.file) != "./boot.jl" && 
-                string(frame.file) != "./loading.jl" && 
-                string(frame.file) != "./Base.jl" &&
-                string(frame.file) != "./dict.jl"
-
-                actual_frames += 1
-                full_err_string *= "[$actual_frames] $(frame.func) at $(frame.file):$(frame.line)\n"
-            end
-        end
-        @error full_err_string
-    end
-
-    function format_method_error(error_msg::String)
-        # Match "MethodError(FUNCTION_NAME, (ARGUMENTS))"
-        if occursin(r"MethodError\((.+?), \((.+)\)\)", error_msg)
-            m = match(r"MethodError\((.+?), \((.+)\)\)", error_msg)
-            func_name = m[1]
-            args = m[2]
-    
-            # Separate top-level arguments while tracking nested depth
-            depth = 0
-            simplified_args = String[]
-            current_arg = ""
-    
-            for char in args
-                if char == '(' || char == '['
-                    depth += 1
-                elseif char == ')' || char == ']'
-                    depth -= 1
-                end
-    
-                if char == ',' && depth == 0
-                    push!(simplified_args, strip(current_arg))
-                    current_arg = ""
-                else
-                    current_arg *= char
-                end
-            end
-            push!(simplified_args, strip(current_arg))  # Add last argument
-    
-            # Process each argument: keep type info, replace deep details with "(...)"
-            for i in 1:length(simplified_args)
-                arg = simplified_args[i]
-    
-                # Extract "Module.Type(...)" and replace details with "(...)"
-                if occursin(r"(\w+\.)+\w+\(", arg)
-                    simplified_args[i] = match(r"((\w+\.)+\w+)\(", arg)[1] * "(...)" 
-    
-                # Handle numbers: Convert to "Int" or "Float64"
-                elseif occursin(r"^\d+\.?\d*$", arg)
-                    try
-                        parsed_num = Meta.parse(arg)
-                        if isa(parsed_num, Integer)
-                            simplified_args[i] = "Int"
-                        elseif isa(parsed_num, AbstractFloat)
-                            simplified_args[i] = "Float64"
-                        end
-                    catch
-                        simplified_args[i] = "(...)"
-                    end
-                end
-            end
-    
-            return "MethodError($func_name, (" * join(simplified_args, ", ") * "))"
-        end
-        return error_msg  # Return original if no match
-    end
-    
-    
-    
 
     function JulGame.add_animator(this::Entity, animator::Animator = Animator(Animation[Animation(Vector4[Vector4(0,0,0,0)], Int32(60))]))
         if this.animator != C_NULL
